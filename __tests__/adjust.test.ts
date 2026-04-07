@@ -1,13 +1,13 @@
-// paragraph-breath/__tests__/adjust.test.ts — unit tests for core algorithm
+// breathe/__tests__/adjust.test.ts — unit tests for core algorithm
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
-	applyParagraphBreath,
-	startBreath,
-	removeParagraphBreath,
+	applyBreathe,
+	startBreathe,
+	removeBreathe,
 	getCleanHTML,
 	triangleWave,
 } from '../src/core/adjust'
-import { PARAGRAPH_BREATH_CLASSES } from '../src/core/types'
+import { BREATHE_CLASSES } from '../src/core/types'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -57,15 +57,15 @@ describe('triangleWave', () => {
 })
 
 // ---------------------------------------------------------------------------
-// applyParagraphBreath — DOM structure
+// applyBreathe — DOM structure
 // ---------------------------------------------------------------------------
 
-describe('applyParagraphBreath', () => {
+describe('applyBreathe', () => {
 	it('wraps lines in .pb-line spans', () => {
 		const el = makeElement('Hello world foo bar')
 		const html = el.innerHTML
-		const { lineSpans } = applyParagraphBreath(el, html)
-		const lines = el.querySelectorAll(`.${PARAGRAPH_BREATH_CLASSES.line}`)
+		const { lineSpans } = applyBreathe(el, html)
+		const lines = el.querySelectorAll(`.${BREATHE_CLASSES.line}`)
 		expect(lines.length).toBeGreaterThanOrEqual(1)
 		cleanup(el)
 	})
@@ -73,8 +73,8 @@ describe('applyParagraphBreath', () => {
 	it('returns lineSpans that match querySelectorAll result', () => {
 		const el = makeElement('Hello world foo bar')
 		const html = el.innerHTML
-		const { lineSpans } = applyParagraphBreath(el, html)
-		const domLines = el.querySelectorAll(`.${PARAGRAPH_BREATH_CLASSES.line}`)
+		const { lineSpans } = applyBreathe(el, html)
+		const domLines = el.querySelectorAll(`.${BREATHE_CLASSES.line}`)
 		expect(lineSpans.length).toBe(domLines.length)
 		cleanup(el)
 	})
@@ -82,14 +82,14 @@ describe('applyParagraphBreath', () => {
 	it('does not throw on empty element', () => {
 		const el = makeElement('')
 		const html = el.innerHTML
-		expect(() => applyParagraphBreath(el, html)).not.toThrow()
+		expect(() => applyBreathe(el, html)).not.toThrow()
 		cleanup(el)
 	})
 
 	it('preserves inline elements like <em> and <strong>', () => {
 		const el = makeElement('Hello <em>world</em> and <strong>more</strong>')
 		const html = el.innerHTML
-		applyParagraphBreath(el, html)
+		applyBreathe(el, html)
 		// After applying, em and strong descendants should still exist
 		const em = el.querySelector('em')
 		const strong = el.querySelector('strong')
@@ -101,25 +101,25 @@ describe('applyParagraphBreath', () => {
 	it('pb-line spans have display:inline-block style', () => {
 		const el = makeElement('Some text here')
 		const html = el.innerHTML
-		applyParagraphBreath(el, html)
-		const line = el.querySelector<HTMLElement>(`.${PARAGRAPH_BREATH_CLASSES.line}`)
+		applyBreathe(el, html)
+		const line = el.querySelector<HTMLElement>(`.${BREATHE_CLASSES.line}`)
 		expect(line?.style.display).toBe('inline-block')
 		cleanup(el)
 	})
 })
 
 // ---------------------------------------------------------------------------
-// removeParagraphBreath
+// removeBreathe
 // ---------------------------------------------------------------------------
 
-describe('removeParagraphBreath', () => {
+describe('removeBreathe', () => {
 	it('restores original HTML', () => {
 		const el = makeElement('Hello world')
 		const originalHTML = el.innerHTML
-		applyParagraphBreath(el, originalHTML)
+		applyBreathe(el, originalHTML)
 		// Confirm it mutated
 		expect(el.innerHTML).not.toBe(originalHTML)
-		removeParagraphBreath(el, originalHTML)
+		removeBreathe(el, originalHTML)
 		expect(el.innerHTML).toBe(originalHTML)
 		cleanup(el)
 	})
@@ -133,8 +133,8 @@ describe('getCleanHTML', () => {
 	it('is idempotent — calling twice returns the same result', () => {
 		const el = makeElement('Hello <em>world</em>')
 		const first = getCleanHTML(el)
-		// Apply paragraph-breath and clean again
-		applyParagraphBreath(el, first)
+		// Apply breathe and clean again
+		applyBreathe(el, first)
 		const second = getCleanHTML(el)
 		expect(second).toBe(first)
 		cleanup(el)
@@ -143,7 +143,7 @@ describe('getCleanHTML', () => {
 	it('removes pb-line, pb-word spans and unwraps children', () => {
 		const el = makeElement('Hello world')
 		const originalHTML = el.innerHTML
-		applyParagraphBreath(el, originalHTML)
+		applyBreathe(el, originalHTML)
 		const cleaned = getCleanHTML(el)
 		expect(cleaned).not.toContain('pb-line')
 		expect(cleaned).not.toContain('pb-word')
@@ -152,10 +152,10 @@ describe('getCleanHTML', () => {
 })
 
 // ---------------------------------------------------------------------------
-// startBreath — rAF loop
+// startBreathe — rAF loop
 // ---------------------------------------------------------------------------
 
-describe('startBreath', () => {
+describe('startBreathe', () => {
 	beforeEach(() => {
 		vi.useFakeTimers()
 		// Provide a stable performance.now mock
@@ -192,11 +192,11 @@ describe('startBreath', () => {
 	it('returns a stop function', () => {
 		const el = makeElement('Hello world')
 		const html = el.innerHTML
-		const { lineSpans } = applyParagraphBreath(el, html)
+		const { lineSpans } = applyBreathe(el, html)
 
 		// If no lineSpans in happy-dom (no layout), supply fake spans
 		const spans = lineSpans.length > 0 ? lineSpans : [document.createElement('span')]
-		const stop = startBreath(spans)
+		const stop = startBreathe(spans)
 		expect(typeof stop).toBe('function')
 		stop()
 		cleanup(el)
@@ -205,7 +205,7 @@ describe('startBreath', () => {
 	it('stop function cancels the animation frame', () => {
 		const cancelSpy = vi.spyOn(globalThis, 'cancelAnimationFrame')
 		const span = document.createElement('span')
-		const stop = startBreath([span])
+		const stop = startBreathe([span])
 		stop()
 		expect(cancelSpy).toHaveBeenCalled()
 		cancelSpy.mockRestore()
@@ -217,7 +217,7 @@ describe('startBreath', () => {
 		const span3 = document.createElement('span')
 		const spans = [span1, span2, span3]
 
-		const stop = startBreath(spans, { phaseOffset: 0, amplitude: 0.05, period: 2 })
+		const stop = startBreathe(spans, { phaseOffset: 0, amplitude: 0.05, period: 2 })
 
 		// Flush one rAF tick
 		;(globalThis as unknown as Record<string, unknown>).__flushRaf?.()
@@ -232,7 +232,7 @@ describe('startBreath', () => {
 
 	it('sets font-variation-settings when axis is wdth', () => {
 		const span = document.createElement('span')
-		const stop = startBreath([span], { axis: 'wdth', amplitude: 0.5, phaseOffset: 0 })
+		const stop = startBreathe([span], { axis: 'wdth', amplitude: 0.5, phaseOffset: 0 })
 
 		;(globalThis as unknown as Record<string, unknown>).__flushRaf?.()
 
@@ -246,15 +246,15 @@ describe('startBreath', () => {
 // ---------------------------------------------------------------------------
 
 describe('edge cases', () => {
-	it('startBreath returns a no-op function for empty lineSpans array', () => {
-		const stop = startBreath([])
+	it('startBreathe returns a no-op function for empty lineSpans array', () => {
+		const stop = startBreathe([])
 		expect(typeof stop).toBe('function')
 		expect(() => stop()).not.toThrow()
 	})
 
-	it('applyParagraphBreath returns empty lineSpans for empty element', () => {
+	it('applyBreathe returns empty lineSpans for empty element', () => {
 		const el = makeElement('')
-		const { lineSpans } = applyParagraphBreath(el, '')
+		const { lineSpans } = applyBreathe(el, '')
 		expect(lineSpans).toHaveLength(0)
 		cleanup(el)
 	})

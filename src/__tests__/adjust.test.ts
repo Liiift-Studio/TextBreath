@@ -1,7 +1,7 @@
-// paragraph-breath/src/__tests__/adjust.test.ts — core algorithm tests
+// breathe/src/__tests__/adjust.test.ts — core algorithm tests
 import { describe, it, expect, beforeEach } from 'vitest'
-import { applyParagraphBreath, removeParagraphBreath, getCleanHTML } from '../core/adjust'
-import { PARAGRAPH_BREATH_CLASSES } from '../core/types'
+import { applyBreathe, removeBreathe, getCleanHTML } from '../core/adjust'
+import { BREATHE_CLASSES } from '../core/types'
 
 // ─── DOM measurement mock ─────────────────────────────────────────────────────
 const CONTAINER_WIDTH = 600
@@ -15,15 +15,15 @@ function mockMeasurement() {
 		configurable: true,
 		set: function () { /* no-op — value is always computed from classList */ },
 		get: function (this: HTMLElement) {
-			if (this.classList?.contains(PARAGRAPH_BREATH_CLASSES.probe)) return 0
-			if (this.classList?.contains(PARAGRAPH_BREATH_CLASSES.word)) return WORD_WIDTH
+			if (this.classList?.contains(BREATHE_CLASSES.probe)) return 0
+			if (this.classList?.contains(BREATHE_CLASSES.word)) return WORD_WIDTH
 			return CONTAINER_WIDTH
 		},
 	})
 	Element.prototype.getBoundingClientRect = function (this: Element) {
 		const el = this as HTMLElement
-		if (el.classList?.contains(PARAGRAPH_BREATH_CLASSES.probe)) return { width: 0 } as DOMRect
-		const w = el.classList?.contains(PARAGRAPH_BREATH_CLASSES.word) ? WORD_WIDTH : CONTAINER_WIDTH
+		if (el.classList?.contains(BREATHE_CLASSES.probe)) return { width: 0 } as DOMRect
+		const w = el.classList?.contains(BREATHE_CLASSES.word) ? WORD_WIDTH : CONTAINER_WIDTH
 		return { width: w, height: 20, top: 0, left: 0, right: w, bottom: 20, x: 0, y: 0, toJSON: () => {} }
 	}
 }
@@ -36,7 +36,7 @@ function makeElement(html: string): HTMLElement {
 }
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
-describe('paragraph-breath', () => {
+describe('breathe', () => {
 	beforeEach(() => {
 		document.body.innerHTML = ''
 		mockMeasurement()
@@ -49,24 +49,24 @@ describe('paragraph-breath', () => {
 		expect(html).toBe(html2)
 	})
 
-	it('applyParagraphBreath does not throw on empty element', () => {
+	it('applyBreathe does not throw on empty element', () => {
 		const el = makeElement('')
 		const original = getCleanHTML(el)
-		expect(() => applyParagraphBreath(el, original, {})).not.toThrow()
+		expect(() => applyBreathe(el, original, {})).not.toThrow()
 	})
 
-	it('removeParagraphBreath restores original HTML', () => {
+	it('removeBreathe restores original HTML', () => {
 		const el = makeElement('<em>Hello</em> world')
 		const original = getCleanHTML(el)
-		applyParagraphBreath(el, original, {})
-		removeParagraphBreath(el, original)
+		applyBreathe(el, original, {})
+		removeBreathe(el, original)
 		expect(el.innerHTML).toBe(original)
 	})
 
 	it('preserves inline elements', () => {
 		const el = makeElement('<em>italic</em> and <strong>bold</strong>')
 		const original = getCleanHTML(el)
-		applyParagraphBreath(el, original, {})
+		applyBreathe(el, original, {})
 		expect(el.querySelector('em')).toBeTruthy()
 		expect(el.querySelector('strong')).toBeTruthy()
 	})

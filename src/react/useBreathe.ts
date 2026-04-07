@@ -1,14 +1,14 @@
-// paragraph-breath/src/react/useParagraphBreath.ts — React hook
+// breathe/src/react/useBreathe.ts — React hook
 import { useLayoutEffect, useRef } from 'react'
-import { applyParagraphBreath, getCleanHTML, startBreath } from '../core/adjust'
-import type { ParagraphBreathOptions } from '../core/types'
+import { applyBreathe, getCleanHTML, startBreathe } from '../core/adjust'
+import type { BreatheOptions } from '../core/types'
 
 /**
- * React hook that applies the paragraph-breath effect to a ref'd element.
+ * React hook that applies the breathe effect to a ref'd element.
  * Re-detects lines and restarts animation on element width change.
  * Respects prefers-reduced-motion — no animation when the user has opted out.
  */
-export function useParagraphBreath(options: ParagraphBreathOptions) {
+export function useBreathe(options: BreatheOptions) {
 	const ref = useRef<HTMLElement>(null)
 	const originalHTMLRef = useRef<string | null>(null)
 	const stopRef = useRef<(() => void) | null>(null)
@@ -28,7 +28,7 @@ export function useParagraphBreath(options: ParagraphBreathOptions) {
 		stopRef.current?.()
 		stopRef.current = null
 
-		const { lineSpans } = applyParagraphBreath(el, originalHTMLRef.current, options)
+		const { lineSpans } = applyBreathe(el, originalHTMLRef.current, options)
 
 		// Respect the user's reduced-motion preference
 		const prefersReducedMotion =
@@ -36,7 +36,7 @@ export function useParagraphBreath(options: ParagraphBreathOptions) {
 			window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 		if (!prefersReducedMotion && lineSpans.length > 0) {
-			stopRef.current = startBreath(lineSpans, options)
+			stopRef.current = startBreathe(lineSpans, options)
 		}
 
 		// ResizeObserver: re-detect lines and restart animation on width change
@@ -53,7 +53,7 @@ export function useParagraphBreath(options: ParagraphBreathOptions) {
 				stopRef.current = null
 
 				if (!originalHTMLRef.current) return
-				const { lineSpans: newSpans } = applyParagraphBreath(
+				const { lineSpans: newSpans } = applyBreathe(
 					el,
 					originalHTMLRef.current,
 					options,
@@ -64,7 +64,7 @@ export function useParagraphBreath(options: ParagraphBreathOptions) {
 					window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 				if (!reduced && newSpans.length > 0) {
-					stopRef.current = startBreath(newSpans, options)
+					stopRef.current = startBreathe(newSpans, options)
 				}
 			})
 		})

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useDeferredValue } from "react"
-import { ParagraphBreathText } from "@liiift-studio/paragraph-breath"
+import { BreatheText } from "@liiift-studio/breathe"
 
 const SAMPLE = `Hold still and watch the paragraph. Each line is breathing at its own pace — expanding and contracting its letter-spacing in a slow oscillation, offset from its neighbours by a fixed phase angle. The top lines and the bottom lines never breathe together. A wave moves through the paragraph rather than a pulse. At the default amplitude the movement is almost subliminal: you notice something alive before you notice what it is. Increase the amplitude to see the mechanics. The wave shape changes the character of the motion — sine is smooth, triangle is more mechanical. The period controls how fast each line completes its cycle.`
 
@@ -16,7 +16,7 @@ function Slider({ label, value, min, max, step, fmt, onChange }: { label: string
 	)
 }
 
-/** Interactive demo for paragraph-breath with amplitude, period, phase, wave shape and axis controls */
+/** Interactive demo for breathe with amplitude, period, phase, wave shape and axis controls */
 export default function Demo() {
 	const [amplitude, setAmplitude] = useState(0.012)
 	const [period, setPeriod] = useState(3.5)
@@ -51,9 +51,9 @@ export default function Demo() {
 					<button key={v} onClick={() => setAxis(v)} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: axis === v ? 1 : 0.5, background: axis === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
 				))}
 			</div>
-			<ParagraphBreathText amplitude={dAmplitude} period={dPeriod} phaseOffset={dPhaseOffset} waveShape={waveShape} axis={axis} style={sampleStyle}>
+			<BreatheText amplitude={dAmplitude} period={dPeriod} phaseOffset={dPhaseOffset} waveShape={waveShape} axis={axis} style={sampleStyle}>
 				{SAMPLE}
-			</ParagraphBreathText>
+			</BreatheText>
 			<p className="text-xs opacity-50 italic mt-6">Each line oscillates at ±{amplitude.toFixed(3)} {axis === 'letter-spacing' ? 'em' : 'wdth units'}, period {period}s, phase offset {phaseOffset.toFixed(2)} rad per line.</p>
 		</div>
 	)

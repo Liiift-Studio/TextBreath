@@ -3,8 +3,8 @@
 // Click-to-copy npm install snippet with a link to the npm package page
 import { useState } from "react"
 
-const CMD = "npm install @liiift-studio/paragraph-breath"
-const NPM_URL = "https://www.npmjs.com/package/paragraph-breath"
+const CMD = "npm install @liiift-studio/breathe"
+const NPM_URL = "https://www.npmjs.com/package/@liiift-studio/breathe"
 
 /** Displays the install command, copies it to clipboard on click, and links to npm */
 export default function CopyInstall() {

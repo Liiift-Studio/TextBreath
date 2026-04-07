@@ -1,5 +1,5 @@
-// paragraph-breath/src/core/adjust.ts — framework-agnostic algorithm
-import { PARAGRAPH_BREATH_CLASSES, type ParagraphBreathOptions } from './types'
+// breathe/src/core/adjust.ts — framework-agnostic algorithm
+import { BREATHE_CLASSES, type BreatheOptions } from './types'
 
 /** Resolved defaults applied when options are omitted */
 const DEFAULTS = {
@@ -25,15 +25,15 @@ export function triangleWave(t: number): number {
 }
 
 /**
- * Strip any prior paragraph-breath markup from an element and return clean innerHTML.
+ * Strip any prior breathe markup from an element and return clean innerHTML.
  * Removes pb-word, pb-line, and pb-probe spans, unwrapping their children in place.
  * Safe to call multiple times — idempotent.
  *
- * @param el - Element that may contain paragraph-breath markup
+ * @param el - Element that may contain breathe markup
  */
 export function getCleanHTML(el: HTMLElement): string {
 	const clone = el.cloneNode(true) as HTMLElement
-	const selector = `.${PARAGRAPH_BREATH_CLASSES.word}, .${PARAGRAPH_BREATH_CLASSES.line}, .${PARAGRAPH_BREATH_CLASSES.probe}`
+	const selector = `.${BREATHE_CLASSES.word}, .${BREATHE_CLASSES.line}, .${BREATHE_CLASSES.probe}`
 	clone.querySelectorAll(selector).forEach((node) => {
 		const parent = node.parentNode
 		if (!parent) return
@@ -46,19 +46,19 @@ export function getCleanHTML(el: HTMLElement): string {
 }
 
 /**
- * Apply paragraph-breath DOM structure to an element.
+ * Apply breathe DOM structure to an element.
  * Wraps words in pb-word spans, groups them into lines by BCR.top, wraps lines
  * in pb-line spans, and inserts forced <br> elements between lines.
  * Returns the array of line span elements so the caller can animate them.
  *
  * @param element      - Target live DOM element (must be rendered and visible)
  * @param originalHTML - Clean HTML snapshot (from getCleanHTML or stored externally)
- * @param options      - ParagraphBreathOptions (merged with defaults)
+ * @param options      - BreatheOptions (merged with defaults)
  */
-export function applyParagraphBreath(
+export function applyBreathe(
 	element: HTMLElement,
 	originalHTML: string,
-	options: ParagraphBreathOptions = {},
+	options: BreatheOptions = {},
 ): { lineSpans: HTMLElement[] } {
 	if (typeof window === 'undefined') return { lineSpans: [] }
 	if (!element) return { lineSpans: [] }
@@ -100,7 +100,7 @@ export function applyParagraphBreath(
 			const trailingSpace = isLastWord ? (tokens[i + 2] ?? '') : ''
 
 			const span = document.createElement('span')
-			span.className = PARAGRAPH_BREATH_CLASSES.word
+			span.className = BREATHE_CLASSES.word
 			span.textContent = space + word + trailingSpace
 			fragment.appendChild(span)
 
@@ -160,7 +160,7 @@ export function applyParagraphBreath(
 	lineGroups.forEach((group, groupIndex) => {
 		const wordsHTML = group.join('')
 		parts.push(
-			`<span class="${PARAGRAPH_BREATH_CLASSES.line}" style="${LINE_STYLE}">${wordsHTML}</span>`,
+			`<span class="${BREATHE_CLASSES.line}" style="${LINE_STYLE}">${wordsHTML}</span>`,
 		)
 		if (groupIndex < lineGroups.length - 1) {
 			parts.push('<br data-pb-break="1">')
@@ -171,22 +171,22 @@ export function applyParagraphBreath(
 
 	// Collect the rendered pb-line spans
 	const lineSpans = Array.from(
-		element.querySelectorAll<HTMLElement>(`.${PARAGRAPH_BREATH_CLASSES.line}`),
+		element.querySelectorAll<HTMLElement>(`.${BREATHE_CLASSES.line}`),
 	)
 
 	return { lineSpans }
 }
 
 /**
- * Start the breath animation on a set of line spans.
+ * Start the breathe animation on a set of line spans.
  * Returns a cleanup function that cancels the rAF loop.
  *
- * @param lineSpans - Array of pb-line span elements from applyParagraphBreath
- * @param options   - ParagraphBreathOptions (merged with defaults)
+ * @param lineSpans - Array of pb-line span elements from applyBreathe
+ * @param options   - BreatheOptions (merged with defaults)
  */
-export function startBreath(
+export function startBreathe(
 	lineSpans: HTMLElement[],
-	options: ParagraphBreathOptions = {},
+	options: BreatheOptions = {},
 ): () => void {
 	if (lineSpans.length === 0) return () => {}
 
@@ -226,11 +226,11 @@ export function startBreath(
 }
 
 /**
- * Remove paragraph-breath markup and restore the element to its original HTML.
+ * Remove breathe markup and restore the element to its original HTML.
  *
  * @param element      - Element that was previously adjusted
- * @param originalHTML - The snapshot passed to the original applyParagraphBreath call
+ * @param originalHTML - The snapshot passed to the original applyBreathe call
  */
-export function removeParagraphBreath(element: HTMLElement, originalHTML: string): void {
+export function removeBreathe(element: HTMLElement, originalHTML: string): void {
 	element.innerHTML = originalHTML
 }

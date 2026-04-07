@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-export const alt = 'Paragraph Breath — Phased per-line letter-spacing oscillation'
+export const alt = 'Breathe — Phased per-line letter-spacing oscillation'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -11,7 +11,7 @@ export default async function Image() {
 	return new ImageResponse(
 		(
 			<div style={{ background: '#0c0c0c', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '72px 80px', fontFamily: 'Inter, sans-serif' }}>
-				<span style={{ fontSize: 13, letterSpacing: '0.18em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>paragraph breath</span>
+				<span style={{ fontSize: 13, letterSpacing: '0.18em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>breathe</span>
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
 					<div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 48 }}>
 						{[1.0, 0.97, 0.92, 0.96, 1.0].map((scale, i) => (
@@ -27,7 +27,7 @@ export default async function Image() {
 						<span>rAF animation</span><span style={{ opacity: 0.4 }}>·</span>
 						<span>React + Vanilla JS</span>
 					</div>
-					<div style={{ fontSize: 13, color: 'rgba(255,255,255,0.18)', letterSpacing: '0.04em' }}>paragraph-breath.liiift.studio</div>
+					<div style={{ fontSize: 13, color: 'rgba(255,255,255,0.18)', letterSpacing: '0.04em' }}>breathe.liiift.studio</div>
 				</div>
 			</div>
 		),
