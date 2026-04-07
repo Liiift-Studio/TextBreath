@@ -59,7 +59,7 @@ export default function Home() {
 				<div className="flex flex-col gap-8 text-sm">
 					<div className="flex flex-col gap-3">
 						<p className="opacity-50">Drop-in component</p>
-						<CodeBlock code={`import { BreatheText } from '@liiift-studio/breathe'
+						<CodeBlock code={`import { BreatheText } from '@liiift-studio/text-breath'
 
 <BreatheText amplitude={0.012} period={3.5} phaseOffset={0.785}>
   Your paragraph text here...
