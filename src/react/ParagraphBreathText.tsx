@@ -1,5 +1,5 @@
 // paragraph-breath/src/react/ParagraphBreathText.tsx — React component wrapper
-import { forwardRef } from 'react'
+import React, { forwardRef } from 'react'
 import { useParagraphBreath } from './useParagraphBreath'
 import type { ParagraphBreathOptions } from '../core/types'
 
@@ -7,7 +7,7 @@ interface ParagraphBreathTextProps extends ParagraphBreathOptions {
 	children: React.ReactNode
 	className?: string
 	style?: React.CSSProperties
-	as?: keyof JSX.IntrinsicElements
+	as?: React.ElementType
 }
 
 /**
@@ -17,7 +17,7 @@ export const ParagraphBreathText = forwardRef<HTMLElement, ParagraphBreathTextPr
 	function ParagraphBreathText({ children, className, style, as: Tag = 'p', ...options }, _ref) {
 		const innerRef = useParagraphBreath(options)
 		return (
-			<Tag ref={innerRef as React.Ref<HTMLParagraphElement>} className={className} style={style}>
+			<Tag ref={innerRef as React.Ref<HTMLElement>} className={className} style={style}>
 				{children}
 			</Tag>
 		)
