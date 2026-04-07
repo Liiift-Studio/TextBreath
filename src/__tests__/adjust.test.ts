@@ -8,9 +8,12 @@ const CONTAINER_WIDTH = 600
 const WORD_WIDTH = 80
 
 function mockMeasurement() {
-	const proto = Object.getPrototypeOf(document.createElement('div'))
-	Object.defineProperty(proto, 'offsetWidth', {
+	// Define on HTMLElement.prototype directly — avoids calling createElement during setup.
+	// Include a no-op setter so happy-dom's HTMLElement constructor doesn't crash when
+	// it tries to assign offsetWidth during element creation.
+	Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
 		configurable: true,
+		set: function () { /* no-op — value is always computed from classList */ },
 		get: function (this: HTMLElement) {
 			if (this.classList?.contains(PARAGRAPH_BREATH_CLASSES.probe)) return 0
 			if (this.classList?.contains(PARAGRAPH_BREATH_CLASSES.word)) return WORD_WIDTH
@@ -28,7 +31,6 @@ function mockMeasurement() {
 function makeElement(html: string): HTMLElement {
 	const el = document.createElement('p')
 	el.innerHTML = html
-	el.style.width = `${CONTAINER_WIDTH}px`
 	document.body.appendChild(el)
 	return el
 }
