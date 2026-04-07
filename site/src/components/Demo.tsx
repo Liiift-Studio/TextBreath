@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useDeferredValue } from "react"
-import { ParagraphBreathText } from "paragraph-breath"
+import { ParagraphBreathText } from "@liiift-studio/paragraph-breath"
 
 const SAMPLE = `Hold still and watch the paragraph. Each line is breathing at its own pace — expanding and contracting its letter-spacing in a slow oscillation, offset from its neighbours by a fixed phase angle. The top lines and the bottom lines never breathe together. A wave moves through the paragraph rather than a pulse. At the default amplitude the movement is almost subliminal: you notice something alive before you notice what it is. Increase the amplitude to see the mechanics. The wave shape changes the character of the motion — sine is smooth, triangle is more mechanical. The period controls how fast each line completes its cycle.`
 
