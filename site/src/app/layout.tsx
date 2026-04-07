@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 	openGraph: {
 		title: "Breathe — Phased per-line letter-spacing oscillation",
 		description: "Each line of text breathes at its own phase. A slow wave ripples through the paragraph.",
-		url: "https://breathe.liiift.studio",
+		url: "https://textbreath.com",
 		siteName: "Breathe",
 		type: "website",
 	},
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 		title: "Breathe — Phased per-line letter-spacing oscillation",
 		description: "Each line of text breathes at its own phase. A slow wave ripples through the paragraph.",
 	},
-	metadataBase: new URL("https://breathe.liiift.studio"),
+	metadataBase: new URL("https://textbreath.com"),
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
