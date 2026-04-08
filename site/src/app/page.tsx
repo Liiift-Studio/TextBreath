@@ -98,6 +98,7 @@ removeBreathe(el, original)`} />
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">axis</td><td className="py-2 pr-6">&apos;letter-spacing&apos;</td><td className="py-2">&apos;letter-spacing&apos; | &apos;wdth&apos; | &apos;wght&apos;</td></tr>
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">mode</td><td className="py-2 pr-6">&apos;phase&apos;</td><td className="py-2">&apos;phase&apos; = standing ripple per line, &apos;tide&apos; = wave travels through paragraph.</td></tr>
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">direction</td><td className="py-2 pr-6">&apos;down&apos;</td><td className="py-2">Tide travel direction. &apos;down&apos; | &apos;up&apos;. Used in tide mode only.</td></tr>
+								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">lineDetection</td><td className="py-2 pr-6">&apos;bcr&apos;</td><td className="py-2">&apos;bcr&apos; reads actual browser layout — ground truth, works with any font and inline HTML. &apos;canvas&apos; uses <a href="https://github.com/chenglou/pretext" className="underline opacity-70">@chenglou/pretext</a> for arithmetic line breaking with no forced reflow on resize. Install pretext separately.</td></tr>
 							</tbody>
 						</table>
 					</div>
