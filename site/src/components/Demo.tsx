@@ -16,6 +16,31 @@ function Slider({ label, value, min, max, step, fmt, onChange }: { label: string
 	)
 }
 
+function CompareButton({ active, onClick }: { active: boolean; onClick: () => void }) {
+	return (
+		<button
+			onClick={onClick}
+			aria-label="Toggle before/after comparison"
+			title={active ? 'Hide comparison' : 'Compare without effect'}
+			style={{
+				position: 'absolute', bottom: 0, right: 0,
+				width: 32, height: 32, borderRadius: '50%',
+				border: '1px solid currentColor',
+				opacity: active ? 0.8 : 0.25,
+				background: 'transparent',
+				display: 'flex', alignItems: 'center', justifyContent: 'center',
+				cursor: 'pointer', transition: 'opacity 0.15s ease',
+			}}
+		>
+			<svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+				<circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1"/>
+				<path d="M7 1.5 A5.5 5.5 0 0 1 7 12.5 Z" fill="currentColor"/>
+				<line x1="7" y1="1.5" x2="7" y2="12.5" stroke="currentColor" strokeWidth="0.75" opacity="0.5"/>
+			</svg>
+		</button>
+	)
+}
+
 /** Interactive demo for breathe with amplitude, period, phase, wave shape and axis controls */
 export default function Demo() {
 	const [amplitude, setAmplitude] = useState(0.012)
@@ -51,16 +76,15 @@ export default function Demo() {
 				{(['letter-spacing', 'wdth'] as const).map(v => (
 					<button key={v} onClick={() => setAxis(v)} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: axis === v ? 1 : 0.5, background: axis === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
 				))}
-				<span className="text-xs uppercase tracking-widest opacity-50 ml-4">Compare</span>
-				<button onClick={() => setComparing(v => !v)} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: comparing ? 1 : 0.5, background: comparing ? 'var(--btn-bg)' : 'transparent' }}>without</button>
 			</div>
-			<div className="relative">
+			<div className="relative pb-8">
 				<BreatheText amplitude={dAmplitude} period={dPeriod} phaseOffset={dPhaseOffset} waveShape={waveShape} axis={axis} style={sampleStyle}>
 					{SAMPLE}
 				</BreatheText>
 				{comparing && (
 					<p aria-hidden style={{ ...sampleStyle, position: 'absolute', top: 0, left: 0, width: '100%', margin: 0, opacity: 0.25, pointerEvents: 'none' }}>{SAMPLE}</p>
 				)}
+				<CompareButton active={comparing} onClick={() => setComparing(v => !v)} />
 			</div>
 			<p className="text-xs opacity-50 italic mt-6">Each line oscillates at ±{amplitude.toFixed(3)} {axis === 'letter-spacing' ? 'em' : 'wdth units'}, period {period}s, phase offset {phaseOffset.toFixed(2)} rad per line.</p>
 		</div>
