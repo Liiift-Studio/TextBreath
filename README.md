@@ -1,58 +1,23 @@
-# paragraph-breath
+# Text Breath
 
-> Continuous subtle per-line letter-spacing oscillation at offset phases — the paragraph breathes
+**[textbreath.com](https://textbreath.com)** · [npm](https://www.npmjs.com/package/@liiift-studio/textbreath) · [GitHub](https://github.com/Liiift-Studio/TextBreath)
 
-## Concept
-
-Each line of a paragraph has its letter-spacing oscillate slowly (±0.01em over 3–4s) at a slightly different phase offset, creating a slow ripple. Lines don't all move together — each is independently offset. At any moment the paragraph is inhaling at top and exhaling at bottom, or vice versa. Subtle. Living.
+---
 
 ## Install
 
 ```bash
-npm install paragraph-breath
+npm install @liiift-studio/textbreath
 ```
 
-## Usage
-
-### React
-
-```tsx
-import { ParagraphBreathText } from 'paragraph-breath'
-
-<ParagraphBreathText>
-  Your paragraph text here.
-</ParagraphBreathText>
-```
-
-### Vanilla JS
-
-```ts
-import { applyParagraphBreath, getCleanHTML } from 'paragraph-breath'
-
-const el = document.querySelector('p')
-const original = getCleanHTML(el)
-applyParagraphBreath(el, original, { /* options */ })
-```
-
-## Options
-
-| Option | Description |
-|--------|-------------|
-| `amplitude` | em, default 0.01 |
-| `period` | seconds per cycle, default 3.5 |
-| `phaseOffset` | radians between lines, default π/4 |
-| `waveShape` | 'sine' | 'triangle' |
-| `axis` | 'letter-spacing' | 'wdth' |
-
-## Development
-
-```bash
-npm install
-npm test
-npm run build
-```
+See [textbreath.com](https://textbreath.com) for full API docs and a live demo.
 
 ---
 
-Part of the [Liiift Studio](https://liiift.studio) typography tools family.
-See also: [Ragtooth](https://ragtooth.liiift.studio)
+## Dev notes
+
+### `next` in root devDependencies
+
+`package.json` at the repo root lists `next` as a devDependency. This is a **Vercel detection workaround** — not a real dependency of the npm package. Vercel's build system inspects the root `package.json` to detect the framework; without `next` present it falls back to a static build and skips the Next.js pipeline, breaking the `/site` subdirectory deploy.
+
+The package itself has zero runtime dependencies. Do not remove this entry.
