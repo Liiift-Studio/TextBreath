@@ -1,5 +1,5 @@
 {
-	"name": "@liiift-studio/text-breath",
+	"name": "@liiift-studio/textBreath",
 	"version": "0.0.1",
 	"description": "Continuous subtle per-line letter-spacing oscillation at offset phases — the paragraph breathes",
 	"type": "module",
