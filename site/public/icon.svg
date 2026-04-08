@@ -1,11 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Background -->
   <rect width="64" height="64" rx="14" fill="hsl(120,55%,10%)"/>
-
-  <!-- Lines with expanding gaps — the breathing rhythm of line-height -->
-  <!-- Gaps grow: 4px → 7px → 10px, like an inhale -->
-  <rect x="9" y="7"  width="46" height="7" rx="3.5" fill="#f0ece3"/>
-  <rect x="9" y="18" width="38" height="7" rx="3.5" fill="#f0ece3" opacity="0.8"/>
-  <rect x="9" y="32" width="46" height="7" rx="3.5" fill="#f0ece3"/>
-  <rect x="9" y="46" width="38" height="7" rx="3.5" fill="#f0ece3" opacity="0.8"/>
+  <rect x="6"  y="7"  width="52" height="7" rx="3.5" fill="#f0ece3"/>
+  <rect x="12" y="18" width="40" height="7" rx="3.5" fill="#f0ece3" opacity="0.9"/>
+  <rect x="20" y="29" width="24" height="7" rx="3.5" fill="#f0ece3" opacity="0.8"/>
+  <rect x="12" y="40" width="40" height="7" rx="3.5" fill="#f0ece3" opacity="0.9"/>
+  <rect x="6"  y="51" width="52" height="7" rx="3.5" fill="#f0ece3"/>
 </svg>
