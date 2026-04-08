@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-export const alt = 'Breathe — Phased per-line letter-spacing oscillation'
+export const alt = 'Text Breath — Per-line letter-spacing and axis wave animation'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 

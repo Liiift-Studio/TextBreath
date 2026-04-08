@@ -2,21 +2,21 @@ import type { Metadata } from "next"
 import "./globals.css"
 
 export const metadata: Metadata = {
-	title: "Breathe — Phased per-line letter-spacing oscillation",
+	title: "Text Breath — Per-line letter-spacing and axis wave animation",
 	icons: { icon: "/icon.svg", shortcut: "/icon.svg", apple: "/icon.svg" },
-	description: "Breathe gives text a breathing quality: each line oscillates its letter-spacing with a per-line phase offset, rippling in a slow wave. An ambient animation that feels organic rather than decorative.",
-	keywords: ["breathe", "letter spacing animation", "typography", "TypeScript", "npm", "rAF", "oscillation"],
+	description: "Text Breath gives a paragraph a living quality: each line oscillates its letter-spacing or variable font axis at a phase offset from its neighbours. Two modes — phase ripple and traveling tide.",
+	keywords: ["text breath", "letter spacing animation", "variable font animation", "typography", "TypeScript", "npm", "rAF", "oscillation", "wave"],
 	openGraph: {
-		title: "Breathe — Phased per-line letter-spacing oscillation",
-		description: "Each line of text breathes at its own phase. A slow wave ripples through the paragraph.",
+		title: "Text Breath — Per-line letter-spacing and axis wave animation",
+		description: "Each line breathes at its own phase — or a wave travels through the paragraph. Drive letter-spacing, wdth, or wght. Two modes, zero dependencies.",
 		url: "https://textbreath.com",
-		siteName: "Breathe",
+		siteName: "Text Breath",
 		type: "website",
 	},
 	twitter: {
 		card: "summary_large_image",
-		title: "Breathe — Phased per-line letter-spacing oscillation",
-		description: "Each line of text breathes at its own phase. A slow wave ripples through the paragraph.",
+		title: "Text Breath — Per-line letter-spacing and axis wave animation",
+		description: "Each line breathes at its own phase — or a wave travels through the paragraph. Drive letter-spacing, wdth, or wght. Two modes, zero dependencies.",
 	},
 	metadataBase: new URL("https://textbreath.com"),
 }
