@@ -62,7 +62,7 @@ export default function Demo() {
 	}
 
 	return (
-		<div className="w-full">
+		<div className="w-full" style={{ overflow: 'hidden' }}>
 			<div className="grid grid-cols-3 gap-6 mb-6">
 				<Slider label="Amplitude" value={amplitude} min={0.002} max={0.06} step={0.001} fmt={v => v.toFixed(3)} onChange={setAmplitude} />
 				<Slider label="Period (s)" value={period} min={1} max={10} step={0.5} onChange={setPeriod} />
@@ -78,7 +78,7 @@ export default function Demo() {
 					<button key={v} onClick={() => setAxis(v)} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: axis === v ? 1 : 0.5, background: axis === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
 				))}
 			</div>
-			<div className="relative pb-8" style={{ overflow: 'hidden' }}>
+			<div className="relative pb-8">
 				<BreatheText amplitude={dAmplitude} period={dPeriod} phaseOffset={dPhaseOffset} waveShape={waveShape} axis={axis} style={sampleStyle}>
 					{SAMPLE}
 				</BreatheText>
