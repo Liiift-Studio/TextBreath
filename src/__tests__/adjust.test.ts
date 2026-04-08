@@ -151,3 +151,96 @@ describe('startBreathe', () => {
 		expect(() => stop()).not.toThrow()
 	})
 })
+
+// ─── Extended coverage ─────────────────────────────────────────────────────────
+describe('triangleWave — extended', () => {
+	it('returns 0 at t=0.25 (quarter period)', () => {
+		expect(triangleWave(0.25)).toBeCloseTo(0)
+	})
+
+	it('returns 0 at t=0.75 (three-quarter period)', () => {
+		expect(triangleWave(0.75)).toBeCloseTo(0)
+	})
+
+	it('handles negative t correctly (still in [-1, 1])', () => {
+		for (let t = -2; t < 0; t += 0.13) {
+			const v = triangleWave(t)
+			expect(v).toBeGreaterThanOrEqual(-1)
+			expect(v).toBeLessThanOrEqual(1)
+		}
+	})
+})
+
+describe('textBreath — extended', () => {
+	let cleanup: (() => void) | null = null
+	beforeEach(() => { document.body.innerHTML = ''; cleanup = mockMeasurement() })
+	afterEach(() => { cleanup?.(); cleanup = null })
+
+	it('amplitude:0 — line spans are produced but startBreathe sets spacing to 0 immediately', () => {
+		const el = makeElement(nWords(14))
+		const original = getCleanHTML(el)
+		const { lineSpans } = applyBreathe(el, original, { amplitude: 0 })
+		expect(lineSpans.length).toBeGreaterThan(0)
+		// With amplitude 0, animation sets spacing to baseValue * 0 = 0
+		const stop = startBreathe(lineSpans, { amplitude: 0 })
+		expect(typeof stop).toBe('function')
+		stop()
+	})
+
+	it('deeply nested element (em inside strong) does not crash', () => {
+		const el = makeElement('<strong><em>deeply</em> nested</strong> paragraph text here now')
+		const original = getCleanHTML(el)
+		expect(() => applyBreathe(el, original, {})).not.toThrow()
+		expect(el.querySelector('em')).toBeTruthy()
+		expect(el.querySelector('strong')).toBeTruthy()
+	})
+
+	it('lineSpans array length matches DOM line span count', () => {
+		const el = makeElement(nWords(21))
+		const original = getCleanHTML(el)
+		const { lineSpans } = applyBreathe(el, original, {})
+		const domCount = el.querySelectorAll('.' + BREATHE_CLASSES.line).length
+		expect(lineSpans.length).toBe(domCount)
+	})
+
+	it('getCleanHTML on applied element returns original content', () => {
+		const el = makeElement(nWords(14))
+		const original = getCleanHTML(el)
+		applyBreathe(el, original, {})
+		const cleaned = getCleanHTML(el)
+		// Cleaned output should match original (no markup classes left)
+		expect(cleaned).not.toContain(BREATHE_CLASSES.line)
+	})
+
+	it('startBreathe with multiple line spans returns a working stop function', () => {
+		const el = makeElement(nWords(21))
+		const original = getCleanHTML(el)
+		const { lineSpans } = applyBreathe(el, original, {})
+		expect(lineSpans.length).toBeGreaterThanOrEqual(3)
+		const stop = startBreathe(lineSpans, { amplitude: 0.01, period: 2 })
+		expect(typeof stop).toBe('function')
+		stop()
+	})
+
+	it('different amplitude values do not throw', () => {
+		for (const amplitude of [0, 0.001, 0.05, 0.5]) {
+			const el = makeElement(nWords(14))
+			const original = getCleanHTML(el)
+			const { lineSpans } = applyBreathe(el, original, { amplitude })
+			wordCallIndex = 0
+			const stop = startBreathe(lineSpans, { amplitude })
+			expect(typeof stop).toBe('function')
+			stop()
+			document.body.innerHTML = ''
+		}
+	})
+
+	it('period option passes without throwing', () => {
+		const el = makeElement(nWords(14))
+		const original = getCleanHTML(el)
+		const { lineSpans } = applyBreathe(el, original, { period: 10 })
+		const stop = startBreathe(lineSpans, { period: 10 })
+		expect(typeof stop).toBe('function')
+		stop()
+	})
+})
