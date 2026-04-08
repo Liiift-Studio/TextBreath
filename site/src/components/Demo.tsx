@@ -42,13 +42,24 @@ function BeforeAfterToggle({ active, onClick }: { active: boolean; onClick: () =
 	)
 }
 
-/** Interactive demo for breathe with amplitude, period, phase, wave shape and axis controls */
+type Axis = 'letter-spacing' | 'wdth' | 'wght'
+
+/** Amplitude defaults per axis so slider range stays useful when switching */
+const AXIS_AMPLITUDE_DEFAULTS: Record<Axis, number> = {
+	'letter-spacing': 0.012,
+	wdth: 0.1,
+	wght: 0.2,
+}
+
+/** Interactive demo for breathe with amplitude, period, phase, wave shape, axis, and mode controls */
 export default function Demo() {
 	const [amplitude, setAmplitude] = useState(0.012)
 	const [period, setPeriod] = useState(3.5)
 	const [phaseOffset, setPhaseOffset] = useState(Math.round(Math.PI / 4 * 100) / 100)
 	const [waveShape, setWaveShape] = useState<'sine' | 'triangle'>('sine')
-	const [axis, setAxis] = useState<'letter-spacing' | 'wdth'>('letter-spacing')
+	const [axis, setAxis] = useState<Axis>('letter-spacing')
+	const [mode, setMode] = useState<'phase' | 'tide'>('phase')
+	const [direction, setDirection] = useState<'down' | 'up'>('down')
 	const [beforeAfter, setComparing] = useState(false)
 
 	const dAmplitude = useDeferredValue(amplitude)
@@ -61,25 +72,49 @@ export default function Demo() {
 		lineHeight: "1.8",
 	}
 
+	function handleAxisChange(v: Axis) {
+		setAxis(v)
+		setAmplitude(AXIS_AMPLITUDE_DEFAULTS[v])
+	}
+
+	const isLetterSpacing = axis === 'letter-spacing'
+	const amplitudeLabel = isLetterSpacing ? 'Amplitude (em)' : `Amplitude (${axis} units ÷ ${axis === 'wght' ? '400' : '100'})`
+	const amplitudeMax = isLetterSpacing ? 0.06 : axis === 'wght' ? 0.8 : 0.5
+	const amplitudeStep = isLetterSpacing ? 0.001 : 0.01
+
 	return (
 		<div className="w-full" style={{ overflow: 'hidden' }}>
 			<div className="grid grid-cols-3 gap-6 mb-6">
-				<Slider label="Amplitude" value={amplitude} min={0.002} max={0.06} step={0.001} fmt={v => v.toFixed(3)} onChange={setAmplitude} />
+				<Slider label={amplitudeLabel} value={amplitude} min={0} max={amplitudeMax} step={amplitudeStep} fmt={v => v.toFixed(3)} onChange={setAmplitude} />
 				<Slider label="Period (s)" value={period} min={1} max={10} step={0.5} onChange={setPeriod} />
-				<Slider label="Phase offset" value={phaseOffset} min={0.1} max={Math.round(Math.PI * 100) / 100} step={0.05} fmt={v => v.toFixed(2)} onChange={setPhaseOffset} />
+				{mode === 'phase' && (
+					<Slider label="Phase offset" value={phaseOffset} min={0.1} max={Math.round(Math.PI * 100) / 100} step={0.05} fmt={v => v.toFixed(2)} onChange={setPhaseOffset} />
+				)}
 			</div>
 			<div className="flex flex-wrap items-center gap-3 mb-8">
-				<span className="text-xs uppercase tracking-widest opacity-50">Wave</span>
+				<span className="text-xs uppercase tracking-widest opacity-50">Axis</span>
+				{(['letter-spacing', 'wdth', 'wght'] as const).map(v => (
+					<button key={v} onClick={() => handleAxisChange(v)} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: axis === v ? 1 : 0.5, background: axis === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
+				))}
+				<span className="text-xs uppercase tracking-widest opacity-50 ml-4">Wave</span>
 				{(['sine', 'triangle'] as const).map(v => (
 					<button key={v} onClick={() => setWaveShape(v)} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: waveShape === v ? 1 : 0.5, background: waveShape === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
 				))}
-				<span className="text-xs uppercase tracking-widest opacity-50 ml-4">Axis</span>
-				{(['letter-spacing', 'wdth'] as const).map(v => (
-					<button key={v} onClick={() => setAxis(v)} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: axis === v ? 1 : 0.5, background: axis === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
+				<span className="text-xs uppercase tracking-widest opacity-50 ml-4">Mode</span>
+				{(['phase', 'tide'] as const).map(v => (
+					<button key={v} onClick={() => setMode(v)} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: mode === v ? 1 : 0.5, background: mode === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
 				))}
+				{mode === 'tide' && (
+					<>
+						<span className="text-xs uppercase tracking-widest opacity-50 ml-4">Dir</span>
+						{(['down', 'up'] as const).map(v => (
+							<button key={v} onClick={() => setDirection(v)} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: direction === v ? 1 : 0.5, background: direction === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
+						))}
+					</>
+				)}
 			</div>
 			<div className="relative pb-8">
-				<BreatheText amplitude={dAmplitude} period={dPeriod} phaseOffset={dPhaseOffset} waveShape={waveShape} axis={axis} style={sampleStyle}>
+				<BreatheText amplitude={dAmplitude} period={dPeriod} phaseOffset={dPhaseOffset} waveShape={waveShape} axis={axis} mode={mode} direction={direction} style={sampleStyle}>
 					{SAMPLE}
 				</BreatheText>
 				{beforeAfter && (
@@ -87,7 +122,12 @@ export default function Demo() {
 				)}
 				<BeforeAfterToggle active={beforeAfter} onClick={() => setComparing(v => !v)} />
 			</div>
-			<p className="text-xs opacity-50 italic mt-6">Each line oscillates at ±{amplitude.toFixed(3)} {axis === 'letter-spacing' ? 'em' : 'wdth units'}, period {period}s, phase offset {phaseOffset.toFixed(2)} rad per line.</p>
+			<p className="text-xs opacity-50 italic mt-6">
+				{mode === 'phase'
+					? `Each line oscillates at ±${amplitude.toFixed(3)} ${axis === 'letter-spacing' ? 'em' : axis + ' units'}, period ${period}s, phase offset ${phaseOffset.toFixed(2)} rad per line.`
+					: `A ${waveShape} wave traveling ${direction === 'down' ? 'top to bottom' : 'bottom to top'}, ±${amplitude.toFixed(3)} on the ${axis} axis every ${period}s.`
+				}
+			</p>
 		</div>
 	)
 }

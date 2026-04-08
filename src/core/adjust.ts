@@ -195,23 +195,43 @@ export function startBreathe(
 	const phaseOffset = options.phaseOffset ?? DEFAULTS.phaseOffset
 	const waveShape   = options.waveShape   ?? DEFAULTS.waveShape
 	const axis        = options.axis        ?? DEFAULTS.axis
+	const mode        = options.mode        ?? 'phase'
+	const direction   = options.direction   ?? 'down'
 
+	const n         = lineSpans.length
 	const startTime = performance.now()
-	let rafId = 0
+	const speed     = 1 / period // cycles per second (used in tide mode)
+	let rafId       = 0
 
 	function tick() {
 		const t = (performance.now() - startTime) / 1000 // seconds
 
 		lineSpans.forEach((span, i) => {
-			const phase = i * phaseOffset
-			const wave = waveShape === 'triangle'
-				? triangleWave(t / period + phase / (2 * Math.PI))
-				: Math.sin(2 * Math.PI * t / period + phase)
+			let wave: number
+
+			if (mode === 'tide') {
+				// Traveling wave: phase advances across lines over time
+				const pos = n > 1 ? i / (n - 1) : 0
+				const phase = direction === 'up'
+					? pos - t * speed
+					: pos + t * speed
+				wave = waveShape === 'triangle'
+					? triangleWave(phase)
+					: Math.sin(2 * Math.PI * phase)
+			} else {
+				// Phase mode: each line has a fixed angular offset, oscillates in place
+				const phase = i * phaseOffset
+				wave = waveShape === 'triangle'
+					? triangleWave(t / period + phase / (2 * Math.PI))
+					: Math.sin(2 * Math.PI * t / period + phase)
+			}
 
 			const value = amplitude * wave
 
 			if (axis === 'wdth') {
 				span.style.fontVariationSettings = `'wdth' ${100 + value * 100}`
+			} else if (axis === 'wght') {
+				span.style.fontVariationSettings = `'wght' ${400 + value * 400}`
 			} else {
 				span.style.letterSpacing = `${value}em`
 			}

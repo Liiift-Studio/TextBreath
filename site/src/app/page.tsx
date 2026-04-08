@@ -25,7 +25,7 @@ export default function Home() {
 					<span>TypeScript</span><span>·</span><span>Zero dependencies</span><span>·</span><span>React + Vanilla JS</span>
 				</div>
 				<p className="text-base opacity-60 leading-relaxed max-w-lg">
-					Each line of a paragraph oscillates its letter-spacing at a fixed phase offset from its neighbours. The result is a slow ripple — a wave of expansion and contraction moving through the text. At low amplitudes it reads as living rather than animated.
+					Each line of a paragraph oscillates its letter-spacing — or variable font axis — at a phase offset from its neighbours. Two modes: <em>phase</em> gives each line a fixed ripple; <em>tide</em> sends a traveling wave through the paragraph. At low amplitudes it reads as living rather than animated.
 				</p>
 			</section>
 
@@ -42,12 +42,12 @@ export default function Home() {
 				<p className="text-xs uppercase tracking-widest opacity-50">How it works</p>
 				<div className="grid grid-cols-1 sm:grid-cols-2 gap-12 text-sm leading-relaxed opacity-70">
 					<div className="flex flex-col gap-3">
-						<p className="font-semibold opacity-100 text-base">Phase offset per line</p>
-						<p>The algorithm detects visual lines and assigns each a phase position: line 0 is at phase 0, line 1 at phaseOffset radians, line 2 at 2× phaseOffset, and so on. Each frame, the wave function is evaluated at each line&apos;s current phase.</p>
+						<p className="font-semibold opacity-100 text-base">Phase mode</p>
+						<p>Each visual line is assigned a fixed phase offset. The wave function is evaluated at each line&apos;s phase every frame. Lines oscillate in place at staggered positions in the cycle — a standing ripple rather than a wave that moves.</p>
 					</div>
 					<div className="flex flex-col gap-3">
-						<p className="font-semibold opacity-100 text-base">Letter-spacing or wdth axis</p>
-						<p>The oscillation can drive either CSS letter-spacing (for any font) or the variable font wdth axis (for variable fonts that support it). The wdth axis gives a more physical quality — the letterforms themselves change shape rather than just spacing.</p>
+						<p className="font-semibold opacity-100 text-base">Tide mode</p>
+						<p>A wave travels through the paragraph from top to bottom (or bottom to top). Each line&apos;s phase advances with time and its position in the paragraph — the same wave that passes through floodText, but applied to letter-spacing or a variable font axis.</p>
 					</div>
 				</div>
 			</section>
@@ -67,15 +67,37 @@ export default function Home() {
 </BreatheText>`} />
 					</div>
 					<div className="flex flex-col gap-3">
+						<p className="opacity-50">Hook</p>
+						<CodeBlock code={`import { useBreathe } from '@liiift-studio/textbreath'
+
+const ref = useBreathe({ amplitude: 0.012, period: 3.5, phaseOffset: 0.785 })
+<p ref={ref}>{children}</p>`} />
+					</div>
+					<div className="flex flex-col gap-3">
+						<p className="opacity-50">Vanilla JS</p>
+						<CodeBlock code={`import { applyBreathe, startBreathe, removeBreathe, getCleanHTML } from '@liiift-studio/textbreath'
+
+const el = document.querySelector('p')
+const original = getCleanHTML(el)
+const { lineSpans } = applyBreathe(el, original, { amplitude: 0.012, period: 3.5 })
+const stop = startBreathe(lineSpans, { amplitude: 0.012, period: 3.5 })
+
+// Later — stop animation and restore:
+stop()
+removeBreathe(el, original)`} />
+					</div>
+					<div className="flex flex-col gap-3">
 						<p className="opacity-50">Options</p>
 						<table className="w-full text-xs">
 							<thead><tr className="opacity-50 text-left"><th className="pb-2 pr-6 font-normal">Option</th><th className="pb-2 pr-6 font-normal">Default</th><th className="pb-2 font-normal">Description</th></tr></thead>
 							<tbody className="opacity-70">
-								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">amplitude</td><td className="py-2 pr-6">0.012</td><td className="py-2">Peak letter-spacing change in em (or wdth units).</td></tr>
+								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">amplitude</td><td className="py-2 pr-6">0.012</td><td className="py-2">Peak change per cycle. Em for letter-spacing; divided by 100/400 for wdth/wght.</td></tr>
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">period</td><td className="py-2 pr-6">3.5</td><td className="py-2">Seconds per full oscillation cycle.</td></tr>
-								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">phaseOffset</td><td className="py-2 pr-6">π/4</td><td className="py-2">Phase shift between adjacent lines in radians.</td></tr>
+								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">phaseOffset</td><td className="py-2 pr-6">π/4</td><td className="py-2">Phase shift between adjacent lines in radians. Used in phase mode only.</td></tr>
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">waveShape</td><td className="py-2 pr-6">&apos;sine&apos;</td><td className="py-2">&apos;sine&apos; | &apos;triangle&apos;</td></tr>
-								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">axis</td><td className="py-2 pr-6">&apos;letter-spacing&apos;</td><td className="py-2">&apos;letter-spacing&apos; | &apos;wdth&apos; (variable font axis)</td></tr>
+								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">axis</td><td className="py-2 pr-6">&apos;letter-spacing&apos;</td><td className="py-2">&apos;letter-spacing&apos; | &apos;wdth&apos; | &apos;wght&apos;</td></tr>
+								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">mode</td><td className="py-2 pr-6">&apos;phase&apos;</td><td className="py-2">&apos;phase&apos; = standing ripple per line, &apos;tide&apos; = wave travels through paragraph.</td></tr>
+								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">direction</td><td className="py-2 pr-6">&apos;down&apos;</td><td className="py-2">Tide travel direction. &apos;down&apos; | &apos;up&apos;. Used in tide mode only.</td></tr>
 							</tbody>
 						</table>
 					</div>
