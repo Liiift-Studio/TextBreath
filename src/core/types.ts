@@ -2,6 +2,18 @@
 
 /** Options controlling the breathe animation */
 export interface BreatheOptions {
+	/**
+	 * Line detection method. Default: 'bcr'
+	 *
+	 * - **'bcr'** (default) — uses `getBoundingClientRect()` on injected word spans.
+	 *   Ground truth: reads actual browser layout, handles all inline HTML and any font.
+	 *
+	 * - **'canvas'** — uses `@chenglou/pretext` canvas measurement for arithmetic line
+	 *   breaking. No forced reflow on resize. Requires `@chenglou/pretext` to be installed.
+	 *   Falls back to 'bcr' on the first render while pretext loads.
+	 *   Avoid with `system-ui` font (canvas resolves differently on macOS).
+	 */
+	lineDetection?: 'bcr' | 'canvas'
 	/** Peak letter-spacing change in em units (or axis units for wdth/wght) (default: 0.012) */
 	amplitude?: number
 	/** Seconds per full oscillation cycle (default: 3.5) */

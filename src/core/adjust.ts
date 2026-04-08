@@ -1,6 +1,41 @@
 // breathe/src/core/adjust.ts — framework-agnostic algorithm
 import { BREATHE_CLASSES, type BreatheOptions } from './types'
 
+// ─── Pretext (canvas line detection) ─────────────────────────────────────────
+
+type PretextModule = {
+	prepareWithSegments: (text: string, font: string) => unknown
+	layoutWithLines: (prepared: unknown, maxWidth: number, lineHeight: number) => { lines: { text: string }[] }
+}
+
+let _pretext: PretextModule | null = null
+let _pretextLoading = false
+
+function tryLoadPretext(): void {
+	if (_pretext !== null || _pretextLoading) return
+	_pretextLoading = true
+	import('@chenglou/pretext' as string)
+		.then((m) => { _pretext = m as PretextModule })
+		.catch(() => {
+			console.warn('[textbreath] canvas lineDetection requires @chenglou/pretext — falling back to BCR')
+		})
+}
+
+type PreparedEntry = { originalHTML: string; prepared: unknown }
+const pretextCache = new WeakMap<HTMLElement, PreparedEntry>()
+
+function getCanvasFont(el: HTMLElement): string {
+	const s = getComputedStyle(el)
+	const family = s.fontFamily.split(',')[0].replace(/['"]/g, '').trim()
+	return `${s.fontWeight} ${s.fontSize} ${family}`
+}
+
+function getLineHeightPx(el: HTMLElement): number {
+	const s = getComputedStyle(el)
+	const lh = parseFloat(s.lineHeight)
+	return isNaN(lh) ? parseFloat(s.fontSize) * 1.2 : lh
+}
+
 /** Resolved defaults applied when options are omitted */
 const DEFAULTS = {
 	amplitude: 0.012,
@@ -124,31 +159,70 @@ export function applyBreathe(
 
 	if (wordEntries.length === 0) return { lineSpans: [] }
 
-	// --- Pass 3: Read BCR.top for each word span and group into lines ---
-	// Batch all BCR reads before any DOM writes.
-	type WordData = { contextHTML: string; top: number }
-	const wordData: WordData[] = wordEntries.map(({ span, contextHTML }) => ({
-		contextHTML,
-		top: Math.round(span.getBoundingClientRect().top),
-	}))
+	// --- Pass 3: Group words into lines ---
+	// Canvas path: pretext arithmetic (no forced reflow on resize).
+	// BCR path: getBoundingClientRect — ground truth for actual browser layout.
 
-	// Group by vertical position
+	const lineDetection = options.lineDetection ?? 'bcr'
+	if (lineDetection === 'canvas') tryLoadPretext()
+
+	const useCanvas = lineDetection === 'canvas' && _pretext !== null
+
 	const lineGroups: string[][] = [] // each group is an array of contextHTML strings
-	let currentGroup: string[] = []
-	let currentTop: number | null = null
 
-	for (const { contextHTML, top } of wordData) {
-		if (currentTop === null) {
-			currentTop = top
+	if (useCanvas) {
+		// Canvas path — use pretext to predict line breaks, no BCR reads
+		const cached = pretextCache.get(element)
+		let prepared: unknown
+		if (cached && cached.originalHTML === originalHTML) {
+			prepared = cached.prepared
+		} else {
+			prepared = _pretext!.prepareWithSegments(element.textContent ?? '', getCanvasFont(element))
+			pretextCache.set(element, { originalHTML, prepared })
 		}
-		if (top !== currentTop) {
-			if (currentGroup.length > 0) lineGroups.push(currentGroup)
-			currentGroup = []
-			currentTop = top
+		const { lines } = _pretext!.layoutWithLines(prepared, element.offsetWidth, getLineHeightPx(element))
+
+		// Map pretext line texts to wordEntries by accumulated text matching
+		let ei = 0
+		for (let li = 0; li < lines.length && ei < wordEntries.length; li++) {
+			const target = lines[li].text.replace(/\s+/g, ' ').trim()
+			const group: string[] = []
+			let acc = ''
+			while (ei < wordEntries.length) {
+				const word = (wordEntries[ei].span.textContent ?? '').replace(/\s+/g, ' ').trim()
+				acc = acc ? acc + ' ' + word : word
+				group.push(wordEntries[ei].contextHTML)
+				ei++
+				if (acc === target) break
+			}
+			if (group.length > 0) lineGroups.push(group)
 		}
-		currentGroup.push(contextHTML)
+		// Trailing entries (normalisation difference) go to last group
+		while (ei < wordEntries.length) {
+			lineGroups[lineGroups.length - 1]?.push(wordEntries[ei++].contextHTML)
+		}
+	} else {
+		// BCR path — batch all reads before any DOM writes
+		type WordData = { contextHTML: string; top: number }
+		const wordData: WordData[] = wordEntries.map(({ span, contextHTML }) => ({
+			contextHTML,
+			top: Math.round(span.getBoundingClientRect().top),
+		}))
+
+		let currentGroup: string[] = []
+		let currentTop: number | null = null
+
+		for (const { contextHTML, top } of wordData) {
+			if (currentTop === null) currentTop = top
+			if (top !== currentTop) {
+				if (currentGroup.length > 0) lineGroups.push(currentGroup)
+				currentGroup = []
+				currentTop = top
+			}
+			currentGroup.push(contextHTML)
+		}
+		if (currentGroup.length > 0) lineGroups.push(currentGroup)
 	}
-	if (currentGroup.length > 0) lineGroups.push(currentGroup)
 
 	if (lineGroups.length === 0) return { lineSpans: [] }
 
