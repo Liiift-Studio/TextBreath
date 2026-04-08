@@ -23,6 +23,7 @@ export default function Demo() {
 	const [phaseOffset, setPhaseOffset] = useState(Math.round(Math.PI / 4 * 100) / 100)
 	const [waveShape, setWaveShape] = useState<'sine' | 'triangle'>('sine')
 	const [axis, setAxis] = useState<'letter-spacing' | 'wdth'>('letter-spacing')
+	const [comparing, setComparing] = useState(false)
 
 	const dAmplitude = useDeferredValue(amplitude)
 	const dPeriod = useDeferredValue(period)
@@ -50,19 +51,18 @@ export default function Demo() {
 				{(['letter-spacing', 'wdth'] as const).map(v => (
 					<button key={v} onClick={() => setAxis(v)} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: axis === v ? 1 : 0.5, background: axis === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
 				))}
+				<span className="text-xs uppercase tracking-widest opacity-50 ml-4">Compare</span>
+				<button onClick={() => setComparing(v => !v)} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: comparing ? 1 : 0.5, background: comparing ? 'var(--btn-bg)' : 'transparent' }}>without</button>
 			</div>
-			<BreatheText amplitude={dAmplitude} period={dPeriod} phaseOffset={dPhaseOffset} waveShape={waveShape} axis={axis} style={sampleStyle}>
-				{SAMPLE}
-			</BreatheText>
+			<div className="relative">
+				<BreatheText amplitude={dAmplitude} period={dPeriod} phaseOffset={dPhaseOffset} waveShape={waveShape} axis={axis} style={sampleStyle}>
+					{SAMPLE}
+				</BreatheText>
+				{comparing && (
+					<p aria-hidden style={{ ...sampleStyle, position: 'absolute', top: 0, left: 0, width: '100%', margin: 0, opacity: 0.25, pointerEvents: 'none' }}>{SAMPLE}</p>
+				)}
+			</div>
 			<p className="text-xs opacity-50 italic mt-6">Each line oscillates at ±{amplitude.toFixed(3)} {axis === 'letter-spacing' ? 'em' : 'wdth units'}, period {period}s, phase offset {phaseOffset.toFixed(2)} rad per line.</p>
-			<div className="flex justify-end mt-8">
-				<div className="w-72 flex flex-col gap-2">
-					<span className="text-xs uppercase tracking-widest opacity-50">without</span>
-					<div className="rounded-lg p-3" style={{ background: "rgba(0,0,0,0.15)" }}>
-						<p style={{ ...sampleStyle, fontSize: "0.7rem", lineHeight: "1.8" }} className="opacity-60">{SAMPLE}</p>
-					</div>
-				</div>
-			</div>
 		</div>
 	)
 }
