@@ -272,13 +272,19 @@ export function startBreathe(
 	const mode        = options.mode        ?? 'phase'
 	const direction   = options.direction   ?? 'down'
 
-	const n         = lineSpans.length
-	const startTime = performance.now()
-	const speed     = 1 / period // cycles per second (used in tide mode)
-	let rafId       = 0
+	const n      = lineSpans.length
+	const speed  = 1 / period // cycles per second (used in tide mode)
+	// elapsed tracks visible animation time only. Without this, performance.now() jumps
+	// when a hidden tab becomes visible again, causing a phase teleport in the wave.
+	let elapsed  = 0
+	let lastTick = performance.now()
+	let rafId    = 0
 
 	function tick() {
-		const t = (performance.now() - startTime) / 1000 // seconds
+		const now = performance.now()
+		if (!document.hidden) elapsed += (now - lastTick) / 1000
+		lastTick = now
+		const t = elapsed // seconds of visible animation time
 
 		lineSpans.forEach((span, i) => {
 			let wave: number
