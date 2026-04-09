@@ -1,5 +1,5 @@
 // breathe/src/react/useBreathe.ts — React hook
-import { useLayoutEffect, useRef } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { applyBreathe, getCleanHTML, startBreathe } from '../core/adjust'
 import type { BreatheOptions } from '../core/types'
 
@@ -12,61 +12,49 @@ export function useBreathe(options: BreatheOptions) {
 	const ref = useRef<HTMLElement>(null)
 	const originalHTMLRef = useRef<string | null>(null)
 	const stopRef = useRef<(() => void) | null>(null)
+	const optionsRef = useRef(options)
+	optionsRef.current = options
 
 	const { amplitude, period, phaseOffset, waveShape, axis, mode, direction, lineDetection } = options
 
-	useLayoutEffect(() => {
+	/** Stop any running animation, re-detect lines, and restart. */
+	const run = useCallback(() => {
 		const el = ref.current
 		if (!el) return
 
-		// Capture original HTML once (before any mutation)
 		if (originalHTMLRef.current === null) {
 			originalHTMLRef.current = getCleanHTML(el)
 		}
 
-		// Stop any running animation before re-applying
 		stopRef.current?.()
 		stopRef.current = null
 
-		const { lineSpans } = applyBreathe(el, originalHTMLRef.current, options)
+		const { lineSpans } = applyBreathe(el, originalHTMLRef.current, optionsRef.current)
 
-		// Respect the user's reduced-motion preference
 		const prefersReducedMotion =
 			typeof window !== 'undefined' &&
 			window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 		if (!prefersReducedMotion && lineSpans.length > 0) {
-			stopRef.current = startBreathe(lineSpans, options)
+			stopRef.current = startBreathe(lineSpans, optionsRef.current)
 		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [amplitude, period, phaseOffset, waveShape, axis, mode, direction, lineDetection])
 
-		// ResizeObserver: re-detect lines and restart animation on width change
+	useLayoutEffect(() => {
+		run()
+
+		const el = ref.current
+		if (!el) return
+
 		let lastWidth = 0
 		let rafId = 0
 		const ro = new ResizeObserver((entries) => {
 			const w = Math.round(entries[0].contentRect.width)
 			if (w === lastWidth) return
 			lastWidth = w
-
 			cancelAnimationFrame(rafId)
-			rafId = requestAnimationFrame(() => {
-				stopRef.current?.()
-				stopRef.current = null
-
-				if (!originalHTMLRef.current) return
-				const { lineSpans: newSpans } = applyBreathe(
-					el,
-					originalHTMLRef.current,
-					options,
-				)
-
-				const reduced =
-					typeof window !== 'undefined' &&
-					window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-				if (!reduced && newSpans.length > 0) {
-					stopRef.current = startBreathe(newSpans, options)
-				}
-			})
+			rafId = requestAnimationFrame(run)
 		})
 
 		ro.observe(el)
@@ -77,8 +65,13 @@ export function useBreathe(options: BreatheOptions) {
 			ro.disconnect()
 			cancelAnimationFrame(rafId)
 		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [amplitude, period, phaseOffset, waveShape, axis, mode, direction, lineDetection])
+	}, [run])
+
+	// Rerun after all fonts finish loading — line detection uses BCR which
+	// gives wrong line groups if the font has not yet swapped in.
+	useEffect(() => {
+		document.fonts.ready.then(run)
+	}, [run])
 
 	return ref
 }
