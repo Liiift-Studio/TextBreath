@@ -99,21 +99,21 @@ export default function Demo() {
 			<div className="flex flex-wrap items-center gap-3 mb-8">
 				<span className="text-xs uppercase tracking-widest opacity-50">Axis</span>
 				{(['letter-spacing', 'wdth', 'wght'] as const).map(v => (
-					<button key={v} onClick={() => handleAxisChange(v)} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: axis === v ? 1 : 0.5, background: axis === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
+					<button key={v} onClick={() => handleAxisChange(v)} aria-pressed={axis === v} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: axis === v ? 1 : 0.5, background: axis === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
 				))}
 				<span className="text-xs uppercase tracking-widest opacity-50 ml-4">Wave</span>
 				{(['sine', 'triangle'] as const).map(v => (
-					<button key={v} onClick={() => setWaveShape(v)} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: waveShape === v ? 1 : 0.5, background: waveShape === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
+					<button key={v} onClick={() => setWaveShape(v)} aria-pressed={waveShape === v} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: waveShape === v ? 1 : 0.5, background: waveShape === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
 				))}
 				<span className="text-xs uppercase tracking-widest opacity-50 ml-4">Mode</span>
 				{(['phase', 'tide'] as const).map(v => (
-					<button key={v} onClick={() => setMode(v)} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: mode === v ? 1 : 0.5, background: mode === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
+					<button key={v} onClick={() => setMode(v)} aria-pressed={mode === v} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: mode === v ? 1 : 0.5, background: mode === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
 				))}
 				{mode === 'tide' && (
 					<>
 						<span className="text-xs uppercase tracking-widest opacity-50 ml-4">Dir</span>
 						{(['down', 'up'] as const).map(v => (
-							<button key={v} onClick={() => setDirection(v)} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: direction === v ? 1 : 0.5, background: direction === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
+							<button key={v} onClick={() => setDirection(v)} aria-pressed={direction === v} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: direction === v ? 1 : 0.5, background: direction === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
 						))}
 					</>
 				)}
