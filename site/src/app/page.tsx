@@ -40,7 +40,7 @@ export default function Home() {
 			{/* Explanation */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
 				<p className="text-xs uppercase tracking-widest opacity-50">How it works</p>
-				<div className="grid grid-cols-1 sm:grid-cols-2 gap-12 text-sm leading-relaxed opacity-70">
+				<div className="prose-grid grid grid-cols-1 sm:grid-cols-2 gap-12 text-sm leading-relaxed opacity-70">
 					<div className="flex flex-col gap-3">
 						<p className="font-semibold opacity-100 text-base">Phase mode</p>
 						<p>Each visual line is assigned a fixed phase offset. The wave function is evaluated at each line&apos;s phase every frame. Lines oscillate in place at staggered positions in the cycle — a standing ripple rather than a wave that moves.</p>
