@@ -83,7 +83,7 @@ export default function Demo() {
 	}
 
 	const isLetterSpacing = axis === 'letter-spacing'
-	const amplitudeLabel = isLetterSpacing ? 'Amplitude (em)' : `Amplitude (${axis} units ÷ ${axis === 'wght' ? '400' : '100'})`
+	const amplitudeLabel = isLetterSpacing ? 'Amplitude (em)' : `Amplitude (× ${axis === 'wght' ? '400' : '100'} ${axis} units)`
 	const amplitudeMax = isLetterSpacing ? 0.06 : axis === 'wght' ? 0.8 : 0.5
 	const amplitudeStep = isLetterSpacing ? 0.001 : 0.01
 
