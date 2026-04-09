@@ -110,7 +110,7 @@ removeBreathe(el, original)`} />
 				<ToolDirectory current="textBreath" />
 				<div className="flex justify-between opacity-50">
 				<span>textBreath v{version}</span>
-				<a href="https://liiift.studio" className="hover:opacity-100 transition-opacity">Liiift Studio</a>
+				<a href="https://liiift.studio" className="hover:opacity-100 transition-opacity"><img src="/logo-white.png" alt="Liiift Studio" style={{ height: 18, display: 'block' }} /></a>
 				</div>
 			</footer>
 
