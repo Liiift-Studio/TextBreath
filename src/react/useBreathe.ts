@@ -13,7 +13,7 @@ export function useBreathe(options: BreatheOptions) {
 	const originalHTMLRef = useRef<string | null>(null)
 	const stopRef = useRef<(() => void) | null>(null)
 
-	const { amplitude, period, phaseOffset, waveShape, axis } = options
+	const { amplitude, period, phaseOffset, waveShape, axis, mode, direction, lineDetection } = options
 
 	useLayoutEffect(() => {
 		const el = ref.current
@@ -78,7 +78,7 @@ export function useBreathe(options: BreatheOptions) {
 			cancelAnimationFrame(rafId)
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [amplitude, period, phaseOffset, waveShape, axis])
+	}, [amplitude, period, phaseOffset, waveShape, axis, mode, direction, lineDetection])
 
 	return ref
 }

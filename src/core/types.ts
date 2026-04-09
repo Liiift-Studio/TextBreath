@@ -24,9 +24,15 @@ export interface BreatheOptions {
 	waveShape?: 'sine' | 'triangle'
 	/** CSS property / axis to animate (default: 'letter-spacing') */
 	axis?: 'letter-spacing' | 'wdth' | 'wght'
-	/** Animation mode — 'phase' gives each line a fixed offset; 'tide' sends a traveling wave through the paragraph (default: 'phase') */
+	/**
+	 * Animation mode — 'phase' gives each line a fixed offset; 'tide' sends a traveling wave through the paragraph.
+	 * @default 'phase'
+	 */
 	mode?: 'phase' | 'tide'
-	/** Wave travel direction — only used when mode is 'tide' (default: 'down') */
+	/**
+	 * Wave travel direction — only used when mode is 'tide'.
+	 * @default 'down'
+	 */
 	direction?: 'up' | 'down'
 }
 

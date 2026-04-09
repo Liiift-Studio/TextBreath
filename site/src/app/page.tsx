@@ -91,7 +91,7 @@ removeBreathe(el, original)`} />
 						<table className="w-full text-xs">
 							<thead><tr className="opacity-50 text-left"><th className="pb-2 pr-6 font-normal">Option</th><th className="pb-2 pr-6 font-normal">Default</th><th className="pb-2 font-normal">Description</th></tr></thead>
 							<tbody className="opacity-70">
-								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">amplitude</td><td className="py-2 pr-6">0.012</td><td className="py-2">Peak change per cycle. Em for letter-spacing; divided by 100/400 for wdth/wght.</td></tr>
+								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">amplitude</td><td className="py-2 pr-6">0.012</td><td className="py-2">Peak change per cycle. Em for letter-spacing; scaled by 100/400 for wdth/wght.</td></tr>
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">period</td><td className="py-2 pr-6">3.5</td><td className="py-2">Seconds per full oscillation cycle.</td></tr>
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">phaseOffset</td><td className="py-2 pr-6">π/4</td><td className="py-2">Phase shift between adjacent lines in radians. Used in phase mode only.</td></tr>
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">waveShape</td><td className="py-2 pr-6">&apos;sine&apos;</td><td className="py-2">&apos;sine&apos; | &apos;triangle&apos;</td></tr>
