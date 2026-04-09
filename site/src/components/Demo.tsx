@@ -88,7 +88,7 @@ export default function Demo() {
 	const amplitudeStep = isLetterSpacing ? 0.001 : 0.01
 
 	return (
-		<div className="w-full" style={{ overflow: 'hidden' }}>
+		<div className="w-full">
 			<div className="grid grid-cols-3 gap-6 mb-6">
 				<Slider label={amplitudeLabel} value={amplitude} min={0} max={amplitudeMax} step={amplitudeStep} fmt={v => v.toFixed(3)} onChange={setAmplitude} />
 				<Slider label="Period (s)" value={period} min={1} max={10} step={0.5} onChange={setPeriod} />
