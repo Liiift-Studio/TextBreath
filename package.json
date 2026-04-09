@@ -1,6 +1,6 @@
 {
 	"name": "@liiift-studio/textbreath",
-	"version": "0.0.13",
+	"version": "0.0.14",
 	"description": "Continuous subtle per-line letter-spacing oscillation at offset phases — the paragraph breathes",
 	"type": "module",
 	"main": "dist/index.cjs",
