@@ -18,6 +18,8 @@ npm install @liiift-studio/textbreath
 
 ## Usage
 
+> **Next.js App Router:** this library uses browser APIs. Add `"use client"` to any component file that imports from it.
+
 ### React component
 
 ```tsx
@@ -33,9 +35,12 @@ import { BreatheText } from '@liiift-studio/textbreath'
 ```tsx
 import { useBreathe } from '@liiift-studio/textbreath'
 
+// Inside a React component:
 const ref = useBreathe({ amplitude: 0.012, period: 3.5, phaseOffset: 0.785 })
-<p ref={ref}>{children}</p>
+return <p ref={ref}>{children}</p>
 ```
+
+The hook starts the animation loop on mount, re-runs line detection on resize via `ResizeObserver`, and re-runs after fonts load via `document.fonts.ready`. Cleans up on unmount.
 
 ### Vanilla JS
 
@@ -48,12 +53,35 @@ const el = document.querySelector('p')
 const original = getCleanHTML(el)
 const opts = { amplitude: 0.012, period: 3.5 }
 
-const { lineSpans } = applyBreathe(el, original, opts)
-const stop = startBreathe(lineSpans, opts)
+let { lineSpans } = applyBreathe(el, original, opts)
+let stop = startBreathe(lineSpans, opts)
+
+document.fonts.ready.then(() => {
+  stop()
+  ;({ lineSpans } = applyBreathe(el, original, opts))
+  stop = startBreathe(lineSpans, opts)
+})
+
+// On resize — stop, re-detect lines, restart:
+const ro = new ResizeObserver(() => {
+  stop()
+  const { lineSpans: newSpans } = applyBreathe(el, original, opts)
+  stop = startBreathe(newSpans, opts)
+})
+ro.observe(el)
 
 // Later — stop the animation loop and restore the DOM:
 stop()
+ro.disconnect()
 removeBreathe(el, original)
+```
+
+### TypeScript
+
+```ts
+import type { BreatheOptions } from '@liiift-studio/textbreath'
+
+const opts: BreatheOptions = { amplitude: 0.012, period: 3.5, mode: 'tide' }
 ```
 
 ---
@@ -66,10 +94,10 @@ removeBreathe(el, original)
 | `period` | `3.5` | Seconds per full oscillation cycle |
 | `phaseOffset` | `π/4` ≈ `0.785` | Radians of phase shift between adjacent lines. Used in `'phase'` mode only |
 | `waveShape` | `'sine'` | `'sine'` \| `'triangle'` |
-| `axis` | `'letter-spacing'` | CSS property or variable font axis to animate: `'letter-spacing'` \| `'wdth'` \| `'wght'` |
+| `axis` | `'letter-spacing'` | Property to animate: `'letter-spacing'` \| `'wdth'` \| `'wght'` |
 | `mode` | `'phase'` | `'phase'` — standing ripple, each line at a fixed phase offset. `'tide'` — wave travels through the paragraph |
 | `direction` | `'down'` | Tide travel direction: `'down'` \| `'up'`. Used in `'tide'` mode only |
-| `lineDetection` | `'bcr'` | `'bcr'` reads actual browser layout — ground truth, works with any font and inline HTML. `'canvas'` uses [`@chenglou/pretext`](https://github.com/chenglou/pretext) for arithmetic line breaking with no forced reflow on resize. Install pretext separately |
+| `lineDetection` | `'bcr'` | `'bcr'` reads actual browser layout — ground truth, works with any font and inline HTML. `'canvas'` uses `@chenglou/pretext` for arithmetic line breaking with no forced reflow on resize (`npm install @chenglou/pretext`). Falls back to `'bcr'` while pretext loads |
 | `as` | `'p'` | HTML element to render. *(React component only)* |
 
 ---
@@ -96,7 +124,7 @@ The package itself has zero runtime dependencies. Do not remove this entry.
 - **Multi-axis mode** — animate both `letter-spacing` and a variable font axis simultaneously from a single instance
 - **Scroll-phase mode** — tie the wave phase to scroll position rather than time, so the paragraph breathes as the user reads down the page
 - **Amplitude envelope** — fade amplitude in on mount and out on unmount for a softer entrance and exit
-- **`prefers-reduced-motion` fade** — currently the animation is disabled entirely under reduced-motion; instead fade to a static state over several seconds
+- **`prefers-reduced-motion` support** — currently no motion check; add an option to respect the user preference by reducing amplitude to zero or stopping the loop
 
 ---
 
