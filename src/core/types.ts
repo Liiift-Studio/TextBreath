@@ -34,6 +34,22 @@ export interface BreatheOptions {
 	 * @default 'down'
 	 */
 	direction?: 'up' | 'down'
+	/**
+	 * Line width preservation strategy during animation. Default: 'none'
+	 *
+	 * Letter-spacing and axis animation change each line's visual width with the wave.
+	 * At the default amplitude (0.012em) the peak overflow per 60-character line is
+	 * roughly 11px — imperceptible for most uses. For display text or large amplitudes
+	 * the breathing width change may be noticeable or cause container overflow.
+	 *
+	 * - **'none'** (default) — no constraint; lines expand and contract freely with the wave.
+	 *
+	 * - **'clamp'** — each line is constrained to its natural (pre-animation) width via
+	 *   `max-width` and `overflow: hidden`. The breathing effect is contained within each
+	 *   line box. Characters at the trailing edge clip slightly during the wide phase.
+	 *   Prevents any container overflow regardless of amplitude.
+	 */
+	linePreservation?: 'none' | 'clamp'
 }
 
 /** CSS class names injected by breathe — use these to target generated markup */

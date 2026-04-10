@@ -248,6 +248,17 @@ export function applyBreathe(
 		element.querySelectorAll<HTMLElement>(`.${BREATHE_CLASSES.line}`),
 	)
 
+	// Optional: clamp each line to its natural (pre-animation) width.
+	// Batch read then batch write — no interleaving to avoid layout thrashing.
+	const linePreservation = options.linePreservation ?? 'none'
+	if (linePreservation === 'clamp') {
+		const naturalWidths = lineSpans.map(span => span.getBoundingClientRect().width)
+		lineSpans.forEach((span, i) => {
+			span.style.maxWidth = `${naturalWidths[i]}px`
+			span.style.overflowX = 'hidden'
+		})
+	}
+
 	return { lineSpans }
 }
 

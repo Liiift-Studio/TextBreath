@@ -25,10 +25,12 @@ npm install @liiift-studio/textbreath
 ```tsx
 import { BreatheText } from '@liiift-studio/textbreath'
 
-<BreatheText amplitude={0.012} period={3.5} phaseOffset={0.785}>
+<BreatheText amplitude={0.012} period={3.5} phaseOffset={0.785} linePreservation="clamp">
   Your paragraph text here...
 </BreatheText>
 ```
+
+`linePreservation="clamp"` constrains each line to its natural width so the breathing effect stays within the line box. Omit it if very small overflow at the line edge is acceptable.
 
 ### React hook
 
@@ -98,6 +100,7 @@ const opts: BreatheOptions = { amplitude: 0.012, period: 3.5, mode: 'tide' }
 | `mode` | `'phase'` | `'phase'` — standing ripple, each line at a fixed phase offset. `'tide'` — wave travels through the paragraph |
 | `direction` | `'down'` | Tide travel direction: `'down'` \| `'up'`. Used in `'tide'` mode only |
 | `lineDetection` | `'bcr'` | `'bcr'` reads actual browser layout — ground truth, works with any font and inline HTML. `'canvas'` uses `@chenglou/pretext` for arithmetic line breaking with no forced reflow on resize (`npm install @chenglou/pretext`). Falls back to `'bcr'` while pretext loads |
+| `linePreservation` | `'none'` | `'none'` — lines breathe freely in width (may overflow container at large amplitudes). `'clamp'` — each line is constrained to its natural width via `max-width` and `overflow: hidden`; the breathing effect is contained within the line box with no container overflow. Characters at the trailing edge clip slightly during the wide phase |
 | `as` | `'p'` | HTML element to render. *(React component only)* |
 
 ---
@@ -105,6 +108,10 @@ const opts: BreatheOptions = { amplitude: 0.012, period: 3.5, mode: 'tide' }
 ## How it works
 
 Each visual line is wrapped in a `<span>`. In `phase` mode, line `i` is assigned a fixed phase of `i × phaseOffset` radians, and the wave is evaluated at that phase each frame. In `tide` mode, each line's phase advances with both time and its index — the same traveling wave used by Flood Text, but applied to letter-spacing or a variable font axis rather than per-character. Both modes run a `requestAnimationFrame` loop at consistent speed regardless of display refresh rate. In React, the loop stops automatically on unmount and is skipped entirely if `prefers-reduced-motion: reduce` is set. In vanilla JS, call the `stop` function returned by `startBreathe` to end the loop.
+
+**Line break safety:** Line breaks are locked to the browser's natural layout — each `applyBreathe` call starts from the original HTML, detects lines at natural spacing, then locks them with `white-space: nowrap`. Word breaks never change during the animation.
+
+**Width overflow:** Letter-spacing animation causes lines to grow and shrink with the wave. At the default `amplitude: 0.012em` the peak overflow for a 60-character line at 16px is approximately 11px — typically imperceptible. At larger amplitudes, use `linePreservation: 'clamp'` to contain the effect within each line box, or add `overflow-x: hidden` to the element's CSS.
 
 ---
 
