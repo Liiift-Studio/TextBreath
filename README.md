@@ -58,7 +58,7 @@ let stop = startBreathe(lineSpans, opts)
 
 document.fonts.ready.then(() => {
   stop()
-  ;({ lineSpans } = applyBreathe(el, original, opts))
+  lineSpans = applyBreathe(el, original, opts).lineSpans
   stop = startBreathe(lineSpans, opts)
 })
 
@@ -124,7 +124,7 @@ The package itself has zero runtime dependencies. Do not remove this entry.
 - **Multi-axis mode** — animate both `letter-spacing` and a variable font axis simultaneously from a single instance
 - **Scroll-phase mode** — tie the wave phase to scroll position rather than time, so the paragraph breathes as the user reads down the page
 - **Amplitude envelope** — fade amplitude in on mount and out on unmount for a softer entrance and exit
-- **`prefers-reduced-motion` support** — currently no motion check; add an option to respect the user preference by reducing amplitude to zero or stopping the loop
+- **`prefers-reduced-motion` in vanilla JS** — the React hook already pauses the animation when the user has opted out of motion; expose the same guard from `startBreathe` so vanilla JS callers don't need to implement the media query themselves
 
 ---
 
