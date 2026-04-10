@@ -62,7 +62,7 @@ removeBreathe(el, original)
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `amplitude` | `0.012` | Peak change per cycle. Em units for `letter-spacing`; axis units for `wdth`/`wght` |
+| `amplitude` | `0.012` | Peak change per cycle. Em units for `letter-spacing`. For `wdth`, the axis value becomes `100 ± (amplitude × 100)`. For `wght`, it becomes `400 ± (amplitude × 400)` |
 | `period` | `3.5` | Seconds per full oscillation cycle |
 | `phaseOffset` | `π/4` ≈ `0.785` | Radians of phase shift between adjacent lines. Used in `'phase'` mode only |
 | `waveShape` | `'sine'` | `'sine'` \| `'triangle'` |
