@@ -1,7 +1,7 @@
 {
 	"name": "@liiift-studio/textbreath",
-	"version": "0.0.19",
-	"description": "Continuous subtle per-line letter-spacing oscillation at offset phases — the paragraph breathes",
+	"version": "1.0.0",
+	"description": "Continuous subtle per-line letter-spacing oscillation at offset phases \u2014 the paragraph breathes",
 	"type": "module",
 	"main": "dist/index.cjs",
 	"module": "dist/index.js",
@@ -54,10 +54,16 @@
 		"typography",
 		"animation",
 		"letter-spacing",
+		"variable-font",
+		"font-variation-settings",
+		"oscillation",
 		"breathing",
+		"line-by-line",
 		"typesetting",
+		"zero-dependencies",
 		"react",
-		"typescript"
+		"typescript",
+		"css"
 	],
 	"author": "Quinn Keaveney <quinn@liiift.studio>",
 	"license": "MIT",
