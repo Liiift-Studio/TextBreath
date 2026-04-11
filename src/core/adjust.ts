@@ -275,6 +275,11 @@ export function startBreathe(
 ): () => void {
 	if (lineSpans.length === 0) return () => {}
 
+	// Skip animation on e-ink / slow-update displays — oscillation produces no
+	// visible effect and wastes power. matchMedia('(update: slow)') is true on
+	// Kindle, Remarkable, and other e-ink panels.
+	if (typeof window !== 'undefined' && window.matchMedia('(update: slow)').matches) return () => {}
+
 	const amplitude   = options.amplitude   ?? DEFAULTS.amplitude
 	const period      = options.period      ?? DEFAULTS.period
 	const phaseOffset = options.phaseOffset ?? DEFAULTS.phaseOffset
