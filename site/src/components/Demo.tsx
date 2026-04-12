@@ -1,5 +1,6 @@
 "use client"
 
+// Interactive breathe demo with amplitude, period, phase, wave shape, axis, mode, cursor/gyro controls
 import { useState, useEffect, useDeferredValue } from "react"
 import { BreatheText } from "@liiift-studio/textbreath"
 
@@ -42,6 +43,27 @@ function BeforeAfterToggle({ active, onClick }: { active: boolean; onClick: () =
 	)
 }
 
+/** Cursor icon SVG */
+function CursorIcon() {
+	return (
+		<svg width="11" height="14" viewBox="0 0 11 14" fill="currentColor" aria-hidden>
+			<path d="M0 0L0 11L3 8L5 13L6.8 12.3L4.8 7.3L8.5 7.3Z" />
+		</svg>
+	)
+}
+
+/** Gyroscope icon SVG — circle with rotation arrow */
+function GyroIcon() {
+	return (
+		<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden>
+			<circle cx="7" cy="7" r="5.5" />
+			<circle cx="7" cy="7" r="1.5" fill="currentColor" stroke="none" />
+			<path d="M7 1.5 A5.5 5.5 0 0 1 12.5 7" strokeWidth="1.4" />
+			<path d="M11.5 5.5 L12.5 7 L13.8 6" strokeWidth="1.2" />
+		</svg>
+	)
+}
+
 type Axis = 'letter-spacing' | 'wdth' | 'wght'
 
 /** Amplitude defaults per axis so slider range stays useful when switching */
@@ -51,7 +73,7 @@ const AXIS_AMPLITUDE_DEFAULTS: Record<Axis, number> = {
 	wght: 0.2,
 }
 
-/** Interactive demo for breathe with amplitude, period, phase, wave shape, axis, and mode controls */
+/** Interactive demo for breathe with amplitude, period, phase, wave shape, axis, mode, cursor/gyro controls */
 export default function Demo() {
 	const [amplitude, setAmplitude] = useState(0.012)
 	const [period, setPeriod] = useState(3.5)
@@ -63,12 +85,117 @@ export default function Demo() {
 	const [beforeAfter, setComparing] = useState(false)
 	const [fontsReady, setFontsReady] = useState(false)
 
+	// Interaction modes — mutually exclusive
+	const [cursorMode, setCursorMode] = useState(false)
+	const [gyroMode, setGyroMode] = useState(false)
+
+	// Gyro-driven values — kept separate from slider state so slider value props
+	// never change during gyro mode (which would cause mobile to scroll to the input)
+	const [gyroPeriod, setGyroPeriod] = useState(3.5)
+	const [gyroAmplitude, setGyroAmplitude] = useState(0.012)
+
+	// Detected capabilities — resolved client-side after mount
+	const [showCursor, setShowCursor] = useState(false)
+	const [showGyro, setShowGyro] = useState(false)
+
 	useEffect(() => {
 		document.fonts.ready.then(() => setFontsReady(true))
 	}, [])
 
-	const dAmplitude = useDeferredValue(amplitude)
-	const dPeriod = useDeferredValue(period)
+	useEffect(() => {
+		const isHover = window.matchMedia('(hover: hover)').matches
+		const isTouch = window.matchMedia('(hover: none)').matches
+		setShowCursor(isHover)
+		setShowGyro(isTouch && 'DeviceOrientationEvent' in window)
+	}, [])
+
+	// Derived amplitude max for current axis — used in cursor/gyro mapping
+	const isLetterSpacing = axis === 'letter-spacing'
+	const amplitudeLabel = isLetterSpacing ? 'Amplitude (em)' : `Amplitude (× ${axis === 'wght' ? '400' : '100'} ${axis} units)`
+	const amplitudeMax = isLetterSpacing ? 0.06 : axis === 'wght' ? 0.8 : 0.5
+	const amplitudeStep = isLetterSpacing ? 0.001 : 0.01
+
+	// Cursor mode — X controls period (1–10s in 0.5 steps), Y controls amplitude (inverted: top = amplitudeMax)
+	useEffect(() => {
+		if (!cursorMode) return
+		const handleMove = (e: MouseEvent) => {
+			const rawPeriod = 1 + (e.clientX / window.innerWidth) * 9
+			setPeriod(Math.round(rawPeriod / 0.5) * 0.5)
+			const rawAmplitude = amplitudeMax * (1 - e.clientY / window.innerHeight)
+			setAmplitude(parseFloat(Math.max(0, Math.min(amplitudeMax, rawAmplitude)).toFixed(3)))
+		}
+		const handleKey = (e: KeyboardEvent) => {
+			if (e.key === 'Escape') setCursorMode(false)
+		}
+		window.addEventListener('mousemove', handleMove)
+		window.addEventListener('keydown', handleKey)
+		return () => {
+			window.removeEventListener('mousemove', handleMove)
+			window.removeEventListener('keydown', handleKey)
+		}
+	}, [cursorMode, amplitudeMax])
+
+	// Gyro mode — gamma controls period, beta controls amplitude
+	// Updates gyroPeriod/gyroAmplitude (not slider state) so slider value props stay frozen,
+	// preventing mobile browsers from scrolling to the input on each orientation update.
+	// rAF throttle limits re-renders to one per frame.
+	useEffect(() => {
+		if (!gyroMode) return
+		let rafId: number | null = null
+		const handleOrientation = (e: DeviceOrientationEvent) => {
+			if (rafId !== null) return
+			rafId = requestAnimationFrame(() => {
+				rafId = null
+				if (e.gamma !== null) {
+					// gamma: -90 (tilt left) to 90 (tilt right) → period 1–10s in 0.5 steps
+					const rawPeriod = 1 + ((e.gamma + 90) / 180) * 9
+					setGyroPeriod(Math.round(rawPeriod / 0.5) * 0.5)
+				}
+				if (e.beta !== null) {
+					// beta when holding portrait: ~90 upright, decreases when tilted back toward you
+					// Clamp to [15, 90] then map to [0, amplitudeMax]: upright = amplitudeMax, tilted back = 0
+					const clamped = Math.max(15, Math.min(90, e.beta))
+					setGyroAmplitude(parseFloat((amplitudeMax * ((clamped - 15) / 75)).toFixed(3)))
+				}
+			})
+		}
+		window.addEventListener('deviceorientation', handleOrientation)
+		return () => {
+			window.removeEventListener('deviceorientation', handleOrientation)
+			if (rafId !== null) cancelAnimationFrame(rafId)
+		}
+	}, [gyroMode, amplitudeMax])
+
+	// Toggle cursor mode — turns off gyro if active
+	const toggleCursor = () => {
+		setGyroMode(false)
+		setCursorMode(v => !v)
+	}
+
+	// Toggle gyro mode — requests iOS permission if needed, turns off cursor if active
+	const toggleGyro = async () => {
+		if (gyroMode) {
+			setGyroMode(false)
+			return
+		}
+		setCursorMode(false)
+		const DOE = DeviceOrientationEvent as typeof DeviceOrientationEvent & {
+			requestPermission?: () => Promise<PermissionState>
+		}
+		if (typeof DOE.requestPermission === 'function') {
+			const permission = await DOE.requestPermission()
+			if (permission === 'granted') setGyroMode(true)
+		} else {
+			setGyroMode(true)
+		}
+	}
+
+	// Effective values: gyro-driven when gyroMode is active, slider-driven otherwise
+	const effectivePeriod = gyroMode ? gyroPeriod : period
+	const effectiveAmplitude = gyroMode ? gyroAmplitude : amplitude
+
+	const dAmplitude = useDeferredValue(effectiveAmplitude)
+	const dPeriod = useDeferredValue(effectivePeriod)
 	const dPhaseOffset = useDeferredValue(phaseOffset)
 
 	const sampleStyle: React.CSSProperties = {
@@ -83,10 +210,7 @@ export default function Demo() {
 		setAmplitude(AXIS_AMPLITUDE_DEFAULTS[v])
 	}
 
-	const isLetterSpacing = axis === 'letter-spacing'
-	const amplitudeLabel = isLetterSpacing ? 'Amplitude (em)' : `Amplitude (× ${axis === 'wght' ? '400' : '100'} ${axis} units)`
-	const amplitudeMax = isLetterSpacing ? 0.06 : axis === 'wght' ? 0.8 : 0.5
-	const amplitudeStep = isLetterSpacing ? 0.001 : 0.01
+	const activeMode = cursorMode || gyroMode
 
 	return (
 		<div className="w-full">
@@ -94,7 +218,7 @@ export default function Demo() {
 				<Slider label={amplitudeLabel} value={amplitude} min={0} max={amplitudeMax} step={amplitudeStep} fmt={v => v.toFixed(3)} onChange={setAmplitude} />
 				<Slider label="Period (s)" value={period} min={1} max={10} step={0.5} onChange={setPeriod} />
 				{mode === 'phase' && (
-					<Slider label="Phase offset" value={phaseOffset} min={0.1} max={Math.round(Math.PI * 100) / 100} step={0.05} fmt={v => v.toFixed(2)} onChange={setPhaseOffset} />
+					<Slider label="Phase offset" value={phaseOffset} min={0.1} max={Math.round(Math.PI * 100) / 100} step={0.05} fmt={v => `${(v / Math.PI).toFixed(2)}π`} onChange={setPhaseOffset} />
 				)}
 			</div>
 			<div className="flex flex-wrap items-center gap-3 mb-8">
@@ -110,13 +234,51 @@ export default function Demo() {
 				{(['phase', 'tide'] as const).map(v => (
 					<button key={v} onClick={() => setMode(v)} aria-pressed={mode === v} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: mode === v ? 1 : 0.5, background: mode === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
 				))}
+				{mode === 'phase' && (
+					<span className="text-xs opacity-40 italic ml-2">— each line oscillates independently</span>
+				)}
 				{mode === 'tide' && (
 					<>
+						<span className="text-xs opacity-40 italic ml-2">— wave travels through paragraph</span>
 						<span className="text-xs uppercase tracking-widest opacity-50 ml-4">Dir</span>
 						{(['down', 'up'] as const).map(v => (
 							<button key={v} onClick={() => setDirection(v)} aria-pressed={direction === v} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: direction === v ? 1 : 0.5, background: direction === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
 						))}
 					</>
+				)}
+
+				{/* Cursor mode — desktop/hover-capable devices only */}
+				{showCursor && (
+					<button
+						onClick={toggleCursor}
+						title="Move cursor to control period (X) and amplitude (Y)"
+						className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border transition-all ml-auto"
+						style={{
+							borderColor: 'currentColor',
+							opacity: cursorMode ? 1 : 0.5,
+							background: cursorMode ? 'var(--btn-bg)' : 'transparent',
+						}}
+					>
+						<CursorIcon />
+						<span>{cursorMode ? 'Esc to exit' : 'Cursor'}</span>
+					</button>
+				)}
+
+				{/* Gyro mode — touch devices with DeviceOrientationEvent */}
+				{showGyro && (
+					<button
+						onClick={toggleGyro}
+						title="Tilt your device to control period (left/right) and amplitude (front/back)"
+						className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border transition-all ml-auto"
+						style={{
+							borderColor: 'currentColor',
+							opacity: gyroMode ? 1 : 0.5,
+							background: gyroMode ? 'var(--btn-bg)' : 'transparent',
+						}}
+					>
+						<GyroIcon />
+						<span>{gyroMode ? 'Tilt active' : 'Tilt'}</span>
+					</button>
 				)}
 			</div>
 			<div className="relative pb-8">
@@ -129,9 +291,13 @@ export default function Demo() {
 				<BeforeAfterToggle active={beforeAfter} onClick={() => setComparing(v => !v)} />
 			</div>
 			<p className="text-xs opacity-50 italic mt-8" style={{ lineHeight: "1.8" }}>
-				{mode === 'phase'
-					? `Each line oscillates at ±${amplitude.toFixed(3)} ${axis === 'letter-spacing' ? 'em' : axis + ' units'}, period ${period}s, phase offset ${phaseOffset.toFixed(2)} rad per line.`
-					: `A ${waveShape} wave traveling ${direction === 'down' ? 'top to bottom' : 'bottom to top'}, ±${amplitude.toFixed(3)} on the ${axis} axis every ${period}s.`
+				{activeMode
+					? cursorMode
+						? 'Move cursor to adjust period and amplitude. Press Esc to exit.'
+						: 'Tilt left/right for period, front/back for amplitude.'
+					: mode === 'phase'
+						? `Each line oscillates at ±${amplitude.toFixed(3)} ${axis === 'letter-spacing' ? 'em' : axis + ' units'}, period ${period}s, phase offset ${(phaseOffset / Math.PI).toFixed(2)}π per line.`
+						: `A ${waveShape} wave traveling ${direction === 'down' ? 'top to bottom' : 'bottom to top'}, ±${amplitude.toFixed(3)} on the ${axis} axis every ${period}s.`
 				}
 			</p>
 		</div>
