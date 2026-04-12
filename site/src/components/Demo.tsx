@@ -1,7 +1,7 @@
 "use client"
 
-// Interactive breathe demo with amplitude, period, phase, wave shape, axis, mode, cursor/gyro controls
-import { useState, useEffect, useDeferredValue } from "react"
+// Interactive breathe demo with amplitude, period, phase, wave shape, axis, mode, cursor/gyro/motion controls
+import { useState, useEffect, useRef, useDeferredValue } from "react"
 import { BreatheText } from "@liiift-studio/textbreath"
 
 const SAMPLE = `Hold still and watch the paragraph. Each line is breathing at its own pace — expanding and contracting its letter-spacing in a slow oscillation, offset from its neighbours by a fixed phase angle. The top lines and the bottom lines never breathe together. A wave moves through the paragraph rather than a pulse. At the default amplitude the movement is almost subliminal: you notice something alive before you notice what it is. Increase the amplitude to see the mechanics. The wave shape changes the character of the motion — sine is smooth, triangle is more mechanical. The period controls how fast each line completes its cycle.`
@@ -64,6 +64,17 @@ function GyroIcon() {
 	)
 }
 
+/** Motion icon SVG — three vertical bars of varying height representing vibration/motion */
+function MotionIcon() {
+	return (
+		<svg width="12" height="14" viewBox="0 0 12 14" fill="currentColor" aria-hidden>
+			<rect x="0" y="9" width="2.5" height="5" rx="1" />
+			<rect x="4.75" y="4" width="2.5" height="10" rx="1" />
+			<rect x="9.5" y="1" width="2.5" height="13" rx="1" />
+		</svg>
+	)
+}
+
 type Axis = 'letter-spacing' | 'wdth' | 'wght'
 
 /** Amplitude defaults per axis so slider range stays useful when switching */
@@ -88,15 +99,24 @@ export default function Demo() {
 	// Interaction modes — mutually exclusive
 	const [cursorMode, setCursorMode] = useState(false)
 	const [gyroMode, setGyroMode] = useState(false)
+	const [motionMode, setMotionMode] = useState(false)
 
 	// Gyro-driven values — kept separate from slider state so slider value props
 	// never change during gyro mode (which would cause mobile to scroll to the input)
 	const [gyroPeriod, setGyroPeriod] = useState(3.5)
 	const [gyroAmplitude, setGyroAmplitude] = useState(0.012)
 
+	// Motion-driven period — kept separate from slider state for the same reason as gyro
+	const [motionPeriod, setMotionPeriod] = useState(3.5)
+	// EMA smoothed speed ref — persists across renders without triggering re-renders
+	const smoothedSpeedRef = useRef(0)
+	// Last mouse position ref — used for per-frame delta calculation
+	const lastMouseRef = useRef<{ x: number; y: number } | null>(null)
+
 	// Detected capabilities — resolved client-side after mount
 	const [showCursor, setShowCursor] = useState(false)
 	const [showGyro, setShowGyro] = useState(false)
+	const [showMotion, setShowMotion] = useState(false)
 
 	useEffect(() => {
 		document.fonts.ready.then(() => setFontsReady(true))
@@ -107,6 +127,8 @@ export default function Demo() {
 		const isTouch = window.matchMedia('(hover: none)').matches
 		setShowCursor(isHover)
 		setShowGyro(isTouch && 'DeviceOrientationEvent' in window)
+		// Motion mode always available: mouse speed on desktop, DeviceMotionEvent on mobile
+		setShowMotion(true)
 	}, [])
 
 	// Derived amplitude max for current axis — used in cursor/gyro mapping
@@ -166,19 +188,77 @@ export default function Demo() {
 		}
 	}, [gyroMode, amplitudeMax])
 
-	// Toggle cursor mode — turns off gyro if active
+	// Motion mode — desktop: mouse speed via mousemove; mobile: DeviceMotionEvent acceleration magnitude
+	// Maps smoothed speed/magnitude to period: fast movement → short period, stillness → long period
+	useEffect(() => {
+		if (!motionMode) return
+
+		let rafId: number | null = null
+
+		/** Map smoothed speed/magnitude to period in [1, 10] rounded to 0.5 steps */
+		function speedToPeriod(speed: number): number {
+			const raw = 10 - (speed / 20) * 9
+			const clamped = Math.max(1, Math.min(10, raw))
+			return Math.round(clamped / 0.5) * 0.5
+		}
+
+		if ('DeviceMotionEvent' in window) {
+			// Mobile path: use accelerometer magnitude
+			const handleMotion = (e: DeviceMotionEvent) => {
+				if (rafId !== null) return
+				rafId = requestAnimationFrame(() => {
+					rafId = null
+					const accel = e.accelerationIncludingGravity
+					if (!accel) return
+					const x = accel.x ?? 0
+					const y = accel.y ?? 0
+					const z = accel.z ?? 0
+					const magnitude = Math.sqrt(x * x + y * y + z * z)
+					smoothedSpeedRef.current = 0.9 * smoothedSpeedRef.current + 0.1 * magnitude
+					setMotionPeriod(speedToPeriod(smoothedSpeedRef.current))
+				})
+			}
+			window.addEventListener('devicemotion', handleMotion)
+			return () => {
+				window.removeEventListener('devicemotion', handleMotion)
+				if (rafId !== null) cancelAnimationFrame(rafId)
+			}
+		} else {
+			// Desktop path: use mouse movement speed
+			const handleMouseMove = (e: MouseEvent) => {
+				const last = lastMouseRef.current
+				if (last !== null) {
+					const dx = e.clientX - last.x
+					const dy = e.clientY - last.y
+					const speed = Math.sqrt(dx * dx + dy * dy)
+					smoothedSpeedRef.current = 0.9 * smoothedSpeedRef.current + 0.1 * speed
+					setMotionPeriod(speedToPeriod(smoothedSpeedRef.current))
+				}
+				lastMouseRef.current = { x: e.clientX, y: e.clientY }
+			}
+			window.addEventListener('mousemove', handleMouseMove)
+			return () => {
+				window.removeEventListener('mousemove', handleMouseMove)
+				if (rafId !== null) cancelAnimationFrame(rafId)
+			}
+		}
+	}, [motionMode])
+
+	// Toggle cursor mode — turns off gyro and motion if active
 	const toggleCursor = () => {
 		setGyroMode(false)
+		setMotionMode(false)
 		setCursorMode(v => !v)
 	}
 
-	// Toggle gyro mode — requests iOS permission if needed, turns off cursor if active
+	// Toggle gyro mode — requests iOS permission if needed, turns off cursor and motion if active
 	const toggleGyro = async () => {
 		if (gyroMode) {
 			setGyroMode(false)
 			return
 		}
 		setCursorMode(false)
+		setMotionMode(false)
 		const DOE = DeviceOrientationEvent as typeof DeviceOrientationEvent & {
 			requestPermission?: () => Promise<PermissionState>
 		}
@@ -190,8 +270,21 @@ export default function Demo() {
 		}
 	}
 
-	// Effective values: gyro-driven when gyroMode is active, slider-driven otherwise
-	const effectivePeriod = gyroMode ? gyroPeriod : period
+	// Toggle motion mode — turns off cursor and gyro if active, resets smoothed speed
+	const toggleMotion = () => {
+		if (motionMode) {
+			setMotionMode(false)
+			return
+		}
+		setCursorMode(false)
+		setGyroMode(false)
+		smoothedSpeedRef.current = 0
+		lastMouseRef.current = null
+		setMotionMode(true)
+	}
+
+	// Effective values: motion → gyro → cursor/slider precedence
+	const effectivePeriod = motionMode ? motionPeriod : (gyroMode ? gyroPeriod : period)
 	const effectiveAmplitude = gyroMode ? gyroAmplitude : amplitude
 
 	const dAmplitude = useDeferredValue(effectiveAmplitude)
@@ -210,7 +303,7 @@ export default function Demo() {
 		setAmplitude(AXIS_AMPLITUDE_DEFAULTS[v])
 	}
 
-	const activeMode = cursorMode || gyroMode
+	const activeMode = cursorMode || gyroMode || motionMode
 
 	return (
 		<div className="w-full">
@@ -280,6 +373,23 @@ export default function Demo() {
 						<span>{gyroMode ? 'Tilt active' : 'Tilt'}</span>
 					</button>
 				)}
+
+				{/* Motion mode — mouse speed on desktop, DeviceMotionEvent on mobile */}
+				{showMotion && (
+					<button
+						onClick={toggleMotion}
+						title="Move quickly to speed up the oscillation, stay still to slow it down"
+						className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border transition-all ml-auto"
+						style={{
+							borderColor: 'currentColor',
+							opacity: motionMode ? 1 : 0.5,
+							background: motionMode ? 'var(--btn-bg)' : 'transparent',
+						}}
+					>
+						<MotionIcon />
+						<span>{motionMode ? 'Motion active' : 'Motion'}</span>
+					</button>
+				)}
 			</div>
 			<div className="relative pb-8">
 				<BreatheText key={String(fontsReady)} amplitude={dAmplitude} period={dPeriod} phaseOffset={dPhaseOffset} waveShape={waveShape} axis={axis} mode={mode} direction={direction} style={sampleStyle}>
@@ -294,7 +404,9 @@ export default function Demo() {
 				{activeMode
 					? cursorMode
 						? 'Move cursor to adjust period and amplitude. Press Esc to exit.'
-						: 'Tilt left/right for period, front/back for amplitude.'
+						: motionMode
+							? 'Head motion drives the breath — moving faster speeds up the oscillation, stillness slows it.'
+							: 'Tilt left/right for period, front/back for amplitude.'
 					: mode === 'phase'
 						? `Each line oscillates at ±${amplitude.toFixed(3)} ${axis === 'letter-spacing' ? 'em' : axis + ' units'}, period ${period}s, phase offset ${(phaseOffset / Math.PI).toFixed(2)}π per line.`
 						: `A ${waveShape} wave traveling ${direction === 'down' ? 'top to bottom' : 'bottom to top'}, ±${amplitude.toFixed(3)} on the ${axis} axis every ${period}s.`
