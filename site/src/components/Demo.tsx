@@ -202,7 +202,7 @@ export default function Demo() {
 			return Math.round(clamped / 0.5) * 0.5
 		}
 
-		if ('DeviceMotionEvent' in window) {
+		if (typeof DeviceMotionEvent !== 'undefined') {
 			// Mobile path: use accelerometer magnitude
 			const handleMotion = (e: DeviceMotionEvent) => {
 				if (rafId !== null) return
