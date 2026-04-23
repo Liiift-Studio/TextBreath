@@ -97,7 +97,8 @@ const opts: BreatheOptions = { amplitude: 0.012, period: 3.5, mode: 'tide' }
 | `amplitude` | `0.012` | Peak change per cycle. Em units for `letter-spacing`. For `wdth`, the axis value becomes `100 ± (amplitude × 100)`. For `wght`, it becomes `400 ± (amplitude × 400)` |
 | `period` | `3.5` | Seconds per full oscillation cycle |
 | `phaseOffset` | `π/4` ≈ `0.785` | Radians of phase shift between adjacent lines. Used in `'phase'` mode only |
-| `waveShape` | `'sine'` | `'sine'` \| `'triangle'` |
+| `waveShape` | `'sine'` | `'sine'` \| `'triangle'` \| `'sawtooth'` |
+| `pauseOffscreen` | `true` | Pause the rAF loop via `IntersectionObserver` when the element is fully scrolled offscreen. Set to `false` to keep animating at all times |
 | `axis` | `'letter-spacing'` | Property to animate: `'letter-spacing'` \| `'wdth'` \| `'wght'` |
 | `mode` | `'phase'` | `'phase'` — standing ripple, each line at a fixed phase offset. `'tide'` — wave travels through the paragraph |
 | `direction` | `'down'` | Tide travel direction: `'down'` \| `'up'`. Used in `'tide'` mode only |
@@ -129,7 +130,6 @@ The package itself has zero runtime dependencies. Do not remove this entry.
 
 ## Future improvements
 
-- **Additional wave shapes** — `sawtooth` for a sharp-edged, one-directional sweep per line
 - **Multi-axis mode** — animate both `letter-spacing` and a variable font axis simultaneously from a single instance
 - **Scroll-phase mode** — tie the wave phase to scroll position rather than time, so the paragraph breathes as the user reads down the page
 - **Amplitude envelope** — fade amplitude in on mount and out on unmount for a softer entrance and exit

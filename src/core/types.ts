@@ -21,7 +21,13 @@ export interface BreatheOptions {
 	/** Radians of phase shift between adjacent lines — used in 'phase' mode (default: Math.PI / 4) */
 	phaseOffset?: number
 	/** Wave shape used for oscillation (default: 'sine') */
-	waveShape?: 'sine' | 'triangle'
+	waveShape?: 'sine' | 'triangle' | 'sawtooth'
+	/**
+	 * Pause the animation loop when the element is not visible in the viewport.
+	 * Uses IntersectionObserver. Resumes automatically when the element re-enters.
+	 * @default true
+	 */
+	pauseOffscreen?: boolean
 	/** CSS property / axis to animate (default: 'letter-spacing') */
 	axis?: 'letter-spacing' | 'wdth' | 'wght'
 	/**

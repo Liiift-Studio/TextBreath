@@ -60,6 +60,17 @@ export function triangleWave(t: number): number {
 }
 
 /**
+ * Sawtooth wave oscillating between -1 and 1 over a period of 1.
+ * Rises linearly from -1 to +1 across each period, then resets sharply.
+ * Input t is a fractional position (any real number).
+ *
+ * @param t - Fractional time position (period = 1)
+ */
+export function sawtoothWave(t: number): number {
+	return 2 * (((t % 1) + 1) % 1) - 1
+}
+
+/**
  * Strip any prior breathe markup from an element and return clean innerHTML.
  * Removes pb-word, pb-line, and pb-probe spans, unwrapping their children in place.
  * Safe to call multiple times — idempotent.
@@ -295,50 +306,82 @@ export function startBreathe(
 	let elapsed  = 0
 	let lastTick = performance.now()
 	let rafId    = 0
+	// paused is set true by the IntersectionObserver when the element scrolls offscreen
+	let paused   = false
 
 	function tick() {
 		const now = performance.now()
-		if (!document.hidden) elapsed += (now - lastTick) / 1000
+		// Always advance lastTick so no time-jump occurs when paused becomes false.
+		// Advance elapsed only when visible and not paused offscreen.
+		if (!paused && !document.hidden) elapsed += (now - lastTick) / 1000
 		lastTick = now
-		const t = elapsed // seconds of visible animation time
 
-		lineSpans.forEach((span, i) => {
-			let wave: number
+		if (!paused) {
+			const t = elapsed // seconds of visible animation time
 
-			if (mode === 'tide') {
-				// Traveling wave: phase advances across lines over time
-				const pos = n > 1 ? i / (n - 1) : 0
-				const phase = direction === 'up'
-					? pos - t * speed
-					: pos + t * speed
-				wave = waveShape === 'triangle'
-					? triangleWave(phase)
-					: Math.sin(2 * Math.PI * phase)
-			} else {
-				// Phase mode: each line has a fixed angular offset, oscillates in place
-				const phase = i * phaseOffset
-				wave = waveShape === 'triangle'
-					? triangleWave(t / period + phase / (2 * Math.PI))
-					: Math.sin(2 * Math.PI * t / period + phase)
-			}
+			lineSpans.forEach((span, i) => {
+				let wave: number
 
-			const value = amplitude * wave
+				if (mode === 'tide') {
+					// Traveling wave: phase advances across lines over time
+					const pos = n > 1 ? i / (n - 1) : 0
+					const phase = direction === 'up'
+						? pos - t * speed
+						: pos + t * speed
+					if (waveShape === 'triangle') {
+						wave = triangleWave(phase)
+					} else if (waveShape === 'sawtooth') {
+						wave = sawtoothWave(phase)
+					} else {
+						wave = Math.sin(2 * Math.PI * phase)
+					}
+				} else {
+					// Phase mode: each line has a fixed angular offset, oscillates in place
+					const phase = i * phaseOffset
+					if (waveShape === 'triangle') {
+						wave = triangleWave(t / period + phase / (2 * Math.PI))
+					} else if (waveShape === 'sawtooth') {
+						wave = sawtoothWave(t / period + phase / (2 * Math.PI))
+					} else {
+						wave = Math.sin(2 * Math.PI * t / period + phase)
+					}
+				}
 
-			if (axis === 'wdth') {
-				span.style.fontVariationSettings = `'wdth' ${100 + value * 100}`
-			} else if (axis === 'wght') {
-				span.style.fontVariationSettings = `'wght' ${400 + value * 400}`
-			} else {
-				span.style.letterSpacing = `${value}em`
-			}
-		})
+				const value = amplitude * wave
+
+				if (axis === 'wdth') {
+					span.style.fontVariationSettings = `'wdth' ${100 + value * 100}`
+				} else if (axis === 'wght') {
+					span.style.fontVariationSettings = `'wght' ${400 + value * 400}`
+				} else {
+					span.style.letterSpacing = `${value}em`
+				}
+			})
+		}
 
 		rafId = requestAnimationFrame(tick)
 	}
 
 	rafId = requestAnimationFrame(tick)
 
-	return () => cancelAnimationFrame(rafId)
+	// Pause animation when element is scrolled fully offscreen to save CPU/GPU.
+	// Default on (pauseOffscreen !== false). Resuming is instant — paused only
+	// skips the animation update; the rAF loop itself keeps running.
+	let io: IntersectionObserver | undefined
+	if (typeof IntersectionObserver !== 'undefined' && options.pauseOffscreen !== false) {
+		const el = lineSpans[0].parentElement
+		if (el) {
+			io = new IntersectionObserver((entries) => {
+				paused = !entries[0].isIntersecting
+			})
+			io.observe(el)
+		}
+	}
+
+	return () => {
+		io?.disconnect()
+		cancelAnimationFrame(rafId)
+	}
 }
 
 /**
