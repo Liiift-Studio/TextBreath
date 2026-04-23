@@ -89,7 +89,7 @@ export default function Demo() {
 	const [amplitude, setAmplitude] = useState(0.012)
 	const [period, setPeriod] = useState(3.5)
 	const [phaseOffset, setPhaseOffset] = useState(Math.round(Math.PI / 4 * 100) / 100)
-	const [waveShape, setWaveShape] = useState<'sine' | 'triangle'>('sine')
+	const [waveShape, setWaveShape] = useState<'sine' | 'triangle' | 'sawtooth'>('sine')
 	const [axis, setAxis] = useState<Axis>('letter-spacing')
 	const [mode, setMode] = useState<'phase' | 'tide'>('phase')
 	const [direction, setDirection] = useState<'down' | 'up'>('down')
@@ -320,7 +320,7 @@ export default function Demo() {
 					<button key={v} onClick={() => handleAxisChange(v)} aria-pressed={axis === v} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: axis === v ? 1 : 0.5, background: axis === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
 				))}
 				<span className="text-xs uppercase tracking-widest opacity-50 ml-4">Wave</span>
-				{(['sine', 'triangle'] as const).map(v => (
+				{(['sine', 'triangle', 'sawtooth'] as const).map(v => (
 					<button key={v} onClick={() => setWaveShape(v)} aria-pressed={waveShape === v} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: waveShape === v ? 1 : 0.5, background: waveShape === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
 				))}
 				<span className="text-xs uppercase tracking-widest opacity-50 ml-4">Mode</span>
