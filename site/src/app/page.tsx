@@ -45,11 +45,11 @@ export default function Home() {
 				<div className="prose-grid grid grid-cols-1 sm:grid-cols-2 gap-12 text-sm leading-relaxed opacity-70">
 					<div className="flex flex-col gap-3">
 						<p className="font-semibold opacity-100 text-base">Phase mode</p>
-						<p>Each visual line is assigned a fixed phase offset. The wave function is evaluated at each line&apos;s phase every frame. Lines oscillate in place at staggered positions in the cycle — a standing ripple rather than a wave that moves.</p>
+						<p>Each visual line is assigned a fixed phase offset. The wave function is evaluated at each line&rsquo;s phase every frame. Lines oscillate in place at staggered positions in the cycle — a standing ripple rather than a wave that moves.</p>
 					</div>
 					<div className="flex flex-col gap-3">
 						<p className="font-semibold opacity-100 text-base">Tide mode</p>
-						<p>A wave travels through the paragraph from top to bottom (or bottom to top). Each line&apos;s phase advances with time and its position in the paragraph — the same wave that passes through floodText, but applied to letter-spacing or a variable font axis.</p>
+						<p>A wave travels through the paragraph from top to bottom (or bottom to top). Each line&rsquo;s phase advances with time and its position in the paragraph — the same wave that passes through floodText, but applied to letter-spacing or a variable font axis.</p>
 					</div>
 				</div>
 			</section>
