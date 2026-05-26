@@ -25,9 +25,18 @@ export interface BreatheOptions {
 	/**
 	 * Pause the animation loop when the element is not visible in the viewport.
 	 * Uses IntersectionObserver. Resumes automatically when the element re-enters.
+	 * The rAF loop keeps running — the tick function simply skips its work.
 	 * @default true
 	 */
 	pauseOffscreen?: boolean
+	/**
+	 * Cancel the rAF loop entirely when the element leaves the viewport instead of
+	 * just skipping work inside the tick. Saves more CPU and battery than the
+	 * default flag-based pause, at the cost of one rAF frame (~16 ms) of delay on
+	 * resume. Requires `pauseOffscreen` to be true (the default).
+	 * @default false
+	 */
+	cancelOffscreen?: boolean
 	/** CSS property / axis to animate (default: 'letter-spacing') */
 	axis?: 'letter-spacing' | 'wdth' | 'wght'
 	/**

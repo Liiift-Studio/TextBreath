@@ -308,6 +308,8 @@ export function startBreathe(
 	let rafId    = 0
 	// paused is set true by the IntersectionObserver when the element scrolls offscreen
 	let paused   = false
+	// running guards the rAF loop — set to false to stop scheduling the next frame
+	let running  = true
 
 	function tick() {
 		const now = performance.now()
@@ -359,26 +361,44 @@ export function startBreathe(
 			})
 		}
 
-		rafId = requestAnimationFrame(tick)
+		if (running) rafId = requestAnimationFrame(tick)
 	}
 
 	rafId = requestAnimationFrame(tick)
 
-	// Pause animation when element is scrolled fully offscreen to save CPU/GPU.
-	// Default on (pauseOffscreen !== false). Resuming is instant — paused only
-	// skips the animation update; the rAF loop itself keeps running.
+	// Pause or cancel the animation when the element scrolls offscreen.
+	// pauseOffscreen (default true) — skip tick work while offscreen; rAF keeps running.
+	// cancelOffscreen (default false) — cancel rAF entirely; one frame delay on resume
+	//   but saves more CPU/battery; requires pauseOffscreen to be active.
 	let io: IntersectionObserver | undefined
 	if (typeof IntersectionObserver !== 'undefined' && options.pauseOffscreen !== false) {
 		const el = lineSpans[0].parentElement
 		if (el) {
-			io = new IntersectionObserver((entries) => {
-				paused = !entries[0].isIntersecting
-			})
+			if (options.cancelOffscreen) {
+				io = new IntersectionObserver((entries) => {
+					if (entries[0].isIntersecting) {
+						if (!running) {
+							running = true
+							lastTick = performance.now() // prevent elapsed jump after pause
+							rafId = requestAnimationFrame(tick)
+						}
+					} else if (running) {
+						running = false
+						cancelAnimationFrame(rafId)
+						rafId = 0
+					}
+				})
+			} else {
+				io = new IntersectionObserver((entries) => {
+					paused = !entries[0].isIntersecting
+				})
+			}
 			io.observe(el)
 		}
 	}
 
 	return () => {
+		running = false
 		io?.disconnect()
 		cancelAnimationFrame(rafId)
 	}
