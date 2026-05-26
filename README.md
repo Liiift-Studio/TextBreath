@@ -99,12 +99,30 @@ const opts: BreatheOptions = { amplitude: 0.012, period: 3.5, mode: 'tide' }
 | `phaseOffset` | `π/4` ≈ `0.785` | Radians of phase shift between adjacent lines. Used in `'phase'` mode only |
 | `waveShape` | `'sine'` | `'sine'` \| `'triangle'` \| `'sawtooth'` |
 | `pauseOffscreen` | `true` | Pause the rAF loop via `IntersectionObserver` when the element is fully scrolled offscreen. Set to `false` to keep animating at all times |
+| `cancelOffscreen` | `false` | Cancel the rAF loop entirely when the element leaves the viewport and restart on re-entry. Saves more CPU than the default flag-based pause. Adds one frame (~16 ms) of delay on resume. Requires `pauseOffscreen: true` |
 | `axis` | `'letter-spacing'` | Property to animate: `'letter-spacing'` \| `'wdth'` \| `'wght'` |
 | `mode` | `'phase'` | `'phase'` — standing ripple, each line at a fixed phase offset. `'tide'` — wave travels through the paragraph |
 | `direction` | `'down'` | Tide travel direction: `'down'` \| `'up'`. Used in `'tide'` mode only |
 | `lineDetection` | `'bcr'` | `'bcr'` reads actual browser layout — ground truth, works with any font and inline HTML. `'canvas'` uses `@chenglou/pretext` for arithmetic line breaking with no forced reflow on resize (`npm install @chenglou/pretext`). Falls back to `'bcr'` while pretext loads |
 | `linePreservation` | `'none'` | `'none'` — lines breathe freely in width (may overflow container at large amplitudes). `'clamp'` — each line is constrained to its natural width via `max-width` and `overflow: hidden`; the breathing effect is contained within the line box with no container overflow. Characters at the trailing edge clip slightly during the wide phase |
 | `as` | `'p'` | HTML element to render. *(React component only)* |
+
+---
+
+## API reference
+
+| Export | Description |
+|--------|-------------|
+| `applyBreathe(el, originalHTML, options?)` | Wrap lines in spans and return `{ lineSpans }`. Call once before `startBreathe`. |
+| `startBreathe(lineSpans, options?)` | Start the rAF animation loop. Returns a `stop()` function. |
+| `removeBreathe(el, originalHTML)` | Restore the element to its original markup. |
+| `getCleanHTML(el)` | Return the element's inner HTML with all injected spans removed. |
+| `triangleWave(t)` | Triangle wave utility exported for custom animation drivers. |
+| `sawtoothWave(t)` | Sawtooth wave utility exported for custom animation drivers. |
+| `useBreathe` | React hook: `(options?) => ref`. Starts on mount, cleans up on unmount, re-detects lines on resize. |
+| `BreatheText` | React component. Accepts all `BreatheOptions` plus `as` prop. |
+| `BreatheOptions` | TypeScript interface for all options. |
+| `BREATHE_CLASSES` | CSS class names injected by the algorithm (`pb-word`, `pb-line`, `pb-probe`). |
 
 ---
 
@@ -137,4 +155,4 @@ The package itself has zero runtime dependencies. Do not remove this entry.
 
 ---
 
-Current version: 0.1.6
+Current version: 1.0.16
