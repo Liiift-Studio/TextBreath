@@ -70,7 +70,7 @@ export function useBreathe(options: BreatheOptions) {
 	// Rerun after all fonts finish loading — line detection uses BCR which
 	// gives wrong line groups if the font has not yet swapped in.
 	useEffect(() => {
-		document.fonts.ready.then(run)
+		document.fonts?.ready?.then(run)
 	}, [run])
 
 	return ref
