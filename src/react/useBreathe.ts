@@ -29,13 +29,20 @@ export function useBreathe(options: BreatheOptions) {
 		stopRef.current?.()
 		stopRef.current = null
 
-		const { lineSpans } = applyBreathe(el, originalHTMLRef.current, optionsRef.current)
-
 		const prefersReducedMotion =
 			typeof window !== 'undefined' &&
-			window.matchMedia('(prefers-reduced-motion: reduce)').matches
+			window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
 
-		if (!prefersReducedMotion && lineSpans.length > 0) {
+		// When reduced motion is preferred, restore original HTML and skip animation entirely.
+		// This gates applyBreathe too, so no DOM restructuring occurs on resize re-runs.
+		if (prefersReducedMotion) {
+			el.innerHTML = originalHTMLRef.current
+			return
+		}
+
+		const { lineSpans } = applyBreathe(el, originalHTMLRef.current, optionsRef.current)
+
+		if (lineSpans.length > 0) {
 			stopRef.current = startBreathe(lineSpans, optionsRef.current)
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps

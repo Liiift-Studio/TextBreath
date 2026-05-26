@@ -112,7 +112,7 @@ export function applyBreathe(
 	// On e-ink / slow-update displays the rAF animation produces no visible effect.
 	// Skip DOM restructuring entirely — just restore original HTML and return.
 	// matchMedia('(update: slow)') is true on Kindle, Remarkable, and similar panels.
-	if (window.matchMedia('(update: slow)').matches) {
+	if (window.matchMedia?.('(update: slow)')?.matches) {
 		element.innerHTML = originalHTML
 		return { lineSpans: [] }
 	}
@@ -297,7 +297,7 @@ export function startBreathe(
 	// Skip animation on e-ink / slow-update displays — oscillation produces no
 	// visible effect and wastes power. matchMedia('(update: slow)') is true on
 	// Kindle, Remarkable, and other e-ink panels.
-	if (typeof window !== 'undefined' && window.matchMedia('(update: slow)').matches) return () => {}
+	if (typeof window !== 'undefined' && window.matchMedia?.('(update: slow)')?.matches) return () => {}
 
 	const amplitude   = options.amplitude   ?? DEFAULTS.amplitude
 	const period      = options.period      ?? DEFAULTS.period
