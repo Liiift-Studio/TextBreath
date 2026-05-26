@@ -107,6 +107,13 @@ removeBreathe(el, original)`} />
 							</tbody>
 						</table>
 					</div>
+					<div className="flex flex-col gap-3">
+						<p className="opacity-50">Accessibility &amp; compatibility</p>
+						<div className="text-xs opacity-70 flex flex-col gap-2">
+							<p><strong className="opacity-100">prefers-reduced-motion</strong> — <code>startBreathe</code> skips the animation loop when the user has requested reduced motion. The DOM structure is still built but no values are applied.</p>
+							<p><strong className="opacity-100">(update: slow)</strong> — On e-ink and slow-refresh displays (Kindle, reMarkable, etc.) both <code>applyBreathe</code> and <code>startBreathe</code> return immediately without restructuring the DOM or starting the rAF loop. The element is restored to its original HTML. Detection uses <code>matchMedia(&apos;(update: slow)&apos;)</code>.</p>
+						</div>
+					</div>
 				</div>
 			</section>
 

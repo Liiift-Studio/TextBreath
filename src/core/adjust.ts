@@ -109,6 +109,14 @@ export function applyBreathe(
 	if (typeof window === 'undefined') return { lineSpans: [] }
 	if (!element) return { lineSpans: [] }
 
+	// On e-ink / slow-update displays the rAF animation produces no visible effect.
+	// Skip DOM restructuring entirely — just restore original HTML and return.
+	// matchMedia('(update: slow)') is true on Kindle, Remarkable, and similar panels.
+	if (window.matchMedia('(update: slow)').matches) {
+		element.innerHTML = originalHTML
+		return { lineSpans: [] }
+	}
+
 	// --- Pass 1: Reset ---
 	element.innerHTML = originalHTML
 
