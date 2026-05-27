@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 		description: "Each line breathes at its own phase — or a wave travels through the paragraph. Drive letter-spacing, wdth, or wght. Two modes, zero dependencies.",
 	},
 	metadataBase: new URL("https://textbreath.com"),
+	alternates: { canonical: "https://textbreath.com" },
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
