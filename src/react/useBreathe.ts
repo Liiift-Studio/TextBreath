@@ -55,13 +55,15 @@ export function useBreathe(options: BreatheOptions) {
 		if (!el) return
 
 		let lastWidth = 0
-		let rafId = 0
+		// Use a ref-like object so the cleanup closure always sees the latest rafId,
+		// preventing a race where the observer schedules a new frame after cleanup runs.
+		const pending = { rafId: 0 }
 		const ro = new ResizeObserver((entries) => {
 			const w = Math.round(entries[0].contentRect.width)
 			if (w === lastWidth) return
 			lastWidth = w
-			cancelAnimationFrame(rafId)
-			rafId = requestAnimationFrame(run)
+			cancelAnimationFrame(pending.rafId)
+			pending.rafId = requestAnimationFrame(run)
 		})
 
 		ro.observe(el)
@@ -70,14 +72,18 @@ export function useBreathe(options: BreatheOptions) {
 			stopRef.current?.()
 			stopRef.current = null
 			ro.disconnect()
-			cancelAnimationFrame(rafId)
+			cancelAnimationFrame(pending.rafId)
 		}
 	}, [run])
 
 	// Rerun after all fonts finish loading — line detection uses BCR which
 	// gives wrong line groups if the font has not yet swapped in.
+	// Guard with a mounted flag: the component may unmount before fonts are
+	// ready, and Promise callbacks cannot be cancelled.
 	useEffect(() => {
-		document.fonts?.ready?.then(run)
+		let mounted = true
+		document.fonts?.ready?.then(() => { if (mounted) run() })
+		return () => { mounted = false }
 	}, [run])
 
 	return ref

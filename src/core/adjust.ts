@@ -14,7 +14,8 @@ let _pretextLoading = false
 function tryLoadPretext(): void {
 	if (_pretext !== null || _pretextLoading) return
 	_pretextLoading = true
-	import('@chenglou/pretext' as string)
+	// @ts-expect-error — optional peer dependency; not present in devDependencies
+	import('@chenglou/pretext')
 		.then((m) => { _pretext = m as PretextModule })
 		.catch(() => {
 			console.warn('[textbreath] canvas lineDetection requires @chenglou/pretext — falling back to BCR')
@@ -173,7 +174,8 @@ export function applyBreathe(
 			wordEntries.push({ span, contextHTML: html })
 		}
 
-		textNode.parentNode!.replaceChild(fragment, textNode)
+		if (!textNode.parentNode) continue
+		textNode.parentNode.replaceChild(fragment, textNode)
 	}
 
 	if (wordEntries.length === 0) return { lineSpans: [] }
@@ -221,11 +223,15 @@ export function applyBreathe(
 			lineGroups[lineGroups.length - 1]?.push(wordEntries[ei++].contextHTML)
 		}
 	} else {
-		// BCR path — batch all reads before any DOM writes
+		// BCR path — batch all reads before any DOM writes.
+		// Store raw (unrounded) top values. Words are grouped by proximity: a word
+		// belongs to the current line if its top is within 1px of the line's anchor.
+		// This tolerates sub-pixel differences across words on the same visual line
+		// (e.g. 19.6 vs 20.3) that Math.round alone would split into separate lines.
 		type WordData = { contextHTML: string; top: number }
 		const wordData: WordData[] = wordEntries.map(({ span, contextHTML }) => ({
 			contextHTML,
-			top: Math.round(span.getBoundingClientRect().top),
+			top: span.getBoundingClientRect().top,
 		}))
 
 		let currentGroup: string[] = []
@@ -233,7 +239,7 @@ export function applyBreathe(
 
 		for (const { contextHTML, top } of wordData) {
 			if (currentTop === null) currentTop = top
-			if (top !== currentTop) {
+			if (Math.abs(top - currentTop) > 1) {
 				if (currentGroup.length > 0) lineGroups.push(currentGroup)
 				currentGroup = []
 				currentTop = top
@@ -248,19 +254,28 @@ export function applyBreathe(
 	// --- Pass 4: Build HTML — wrap each line group in a pb-line span ---
 	// Each line is an inline-block span containing the words with their inline context.
 	// A <br data-pb-break> between lines forces visual line breaks.
+	// pb-word spans are hidden from assistive technology (aria-hidden) so screen
+	// readers read the element's text content rather than the injected structure.
 	const parts: string[] = []
 
 	lineGroups.forEach((group, groupIndex) => {
 		const wordsHTML = group.join('')
 		parts.push(
-			`<span class="${BREATHE_CLASSES.line}" style="${LINE_STYLE}">${wordsHTML}</span>`,
+			`<span class="${BREATHE_CLASSES.line}" aria-hidden="true" style="${LINE_STYLE}">${wordsHTML}</span>`,
 		)
 		if (groupIndex < lineGroups.length - 1) {
-			parts.push('<br data-pb-break="1">')
+			parts.push('<br aria-hidden="true" data-pb-break="1">')
 		}
 	})
 
 	element.innerHTML = parts.join('')
+
+	// Expose the original plain text via aria-label so screen readers announce
+	// the content without parsing the visual line-span structure.
+	const plainText = element.textContent ?? ''
+	if (plainText.trim()) {
+		element.setAttribute('aria-label', plainText.trim())
+	}
 
 	// Collect the rendered pb-line spans
 	const lineSpans = Array.from(
@@ -294,10 +309,17 @@ export function startBreathe(
 ): () => void {
 	if (lineSpans.length === 0) return () => {}
 
-	// Skip animation on e-ink / slow-update displays — oscillation produces no
-	// visible effect and wastes power. matchMedia('(update: slow)') is true on
-	// Kindle, Remarkable, and other e-ink panels.
-	if (typeof window !== 'undefined' && window.matchMedia?.('(update: slow)')?.matches) return () => {}
+	if (typeof window !== 'undefined') {
+		// Skip animation on e-ink / slow-update displays — oscillation produces no
+		// visible effect and wastes power. matchMedia('(update: slow)') is true on
+		// Kindle, Remarkable, and other e-ink panels.
+		if (window.matchMedia?.('(update: slow)')?.matches) return () => {}
+
+		// Respect prefers-reduced-motion — return a no-op when the user has opted
+		// out of motion so vanilla JS callers get the same accessibility guard as
+		// the React hook without needing to implement the media query themselves.
+		if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) return () => {}
+	}
 
 	const amplitude   = options.amplitude   ?? DEFAULTS.amplitude
 	const period      = options.period      ?? DEFAULTS.period
@@ -387,6 +409,7 @@ export function startBreathe(
 					if (entries[0].isIntersecting) {
 						if (!running) {
 							running = true
+							paused = false // ensure tick does not skip work after restart
 							lastTick = performance.now() // prevent elapsed jump after pause
 							rafId = requestAnimationFrame(tick)
 						}
@@ -420,4 +443,6 @@ export function startBreathe(
  */
 export function removeBreathe(element: HTMLElement, originalHTML: string): void {
 	element.innerHTML = originalHTML
+	// Remove the aria-label added by applyBreathe — the original markup is its own label.
+	element.removeAttribute('aria-label')
 }

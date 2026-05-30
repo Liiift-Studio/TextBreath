@@ -1,6 +1,6 @@
 // textBreath/src/__tests__/adjust.test.ts — core algorithm tests
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { applyBreathe, removeBreathe, startBreathe, getCleanHTML, triangleWave } from '../core/adjust'
+import { applyBreathe, removeBreathe, startBreathe, getCleanHTML, triangleWave, sawtoothWave } from '../core/adjust'
 import { BREATHE_CLASSES } from '../core/types'
 
 // ─── DOM measurement mock ─────────────────────────────────────────────────────
@@ -40,7 +40,7 @@ function mockMeasurement() {
 	}
 }
 
-function makeElement(html) {
+function makeElement(html: string): HTMLElement {
 	const el = document.createElement('p')
 	el.innerHTML = html
 	el.style.width = CONTAINER_WIDTH + 'px'
@@ -48,7 +48,7 @@ function makeElement(html) {
 	return el
 }
 
-function nWords(n, word = 'word') {
+function nWords(n: number, word = 'word'): string {
 	return Array.from({ length: n }, () => word).join(' ')
 }
 
@@ -68,7 +68,7 @@ describe('triangleWave', () => {
 
 // ─── applyBreathe / getCleanHTML / removeBreathe ──────────────────────────────
 describe('textBreath', () => {
-	let cleanup = null
+	let cleanup: (() => void) | null = null
 	beforeEach(() => { document.body.innerHTML = ''; cleanup = mockMeasurement() })
 	afterEach(() => { cleanup?.(); cleanup = null })
 
@@ -134,7 +134,7 @@ describe('textBreath', () => {
 
 // ─── startBreathe ─────────────────────────────────────────────────────────────
 describe('startBreathe', () => {
-	let cleanup = null
+	let cleanup: (() => void) | null = null
 	beforeEach(() => { document.body.innerHTML = ''; cleanup = mockMeasurement() })
 	afterEach(() => { cleanup?.(); cleanup = null })
 
@@ -242,5 +242,72 @@ describe('textBreath — extended', () => {
 		const stop = startBreathe(lineSpans, { period: 10 })
 		expect(typeof stop).toBe('function')
 		stop()
+	})
+
+	it('waveShape: triangle does not throw', () => {
+		const el = makeElement(nWords(14))
+		const original = getCleanHTML(el)
+		const { lineSpans } = applyBreathe(el, original, {})
+		const stop = startBreathe(lineSpans, { waveShape: 'triangle' })
+		expect(typeof stop).toBe('function')
+		stop()
+	})
+
+	it('waveShape: sawtooth does not throw', () => {
+		const el = makeElement(nWords(14))
+		const original = getCleanHTML(el)
+		const { lineSpans } = applyBreathe(el, original, {})
+		const stop = startBreathe(lineSpans, { waveShape: 'sawtooth' })
+		expect(typeof stop).toBe('function')
+		stop()
+	})
+
+	it('mode: tide does not throw', () => {
+		const el = makeElement(nWords(14))
+		const original = getCleanHTML(el)
+		const { lineSpans } = applyBreathe(el, original, {})
+		const stop = startBreathe(lineSpans, { mode: 'tide' })
+		expect(typeof stop).toBe('function')
+		stop()
+	})
+
+	it('mode: tide with direction: up does not throw', () => {
+		const el = makeElement(nWords(14))
+		const original = getCleanHTML(el)
+		const { lineSpans } = applyBreathe(el, original, {})
+		const stop = startBreathe(lineSpans, { mode: 'tide', direction: 'up' })
+		expect(typeof stop).toBe('function')
+		stop()
+	})
+
+	it('linePreservation: clamp sets maxWidth on line spans', () => {
+		const el = makeElement(nWords(14))
+		const original = getCleanHTML(el)
+		const { lineSpans } = applyBreathe(el, original, { linePreservation: 'clamp' })
+		expect(lineSpans.length).toBeGreaterThan(0)
+		lineSpans.forEach((span) => {
+			expect(span.style.maxWidth).not.toBe('')
+		})
+	})
+})
+
+// ─── sawtoothWave ──────────────────────────────────────────────────────────────
+describe('sawtoothWave', () => {
+	it('returns -1 at t=0', () => { expect(sawtoothWave(0)).toBeCloseTo(-1) })
+	it('returns 0 at t=0.5', () => { expect(sawtoothWave(0.5)).toBeCloseTo(0) })
+	it('returns 1 approaching t=1', () => { expect(sawtoothWave(0.999)).toBeCloseTo(1, 1) })
+	it('is always in range [-1, 1]', () => {
+		for (let t = 0; t < 2; t += 0.07) {
+			const v = sawtoothWave(t)
+			expect(v).toBeGreaterThanOrEqual(-1)
+			expect(v).toBeLessThanOrEqual(1)
+		}
+	})
+	it('handles negative t (stays in [-1, 1])', () => {
+		for (let t = -2; t < 0; t += 0.13) {
+			const v = sawtoothWave(t)
+			expect(v).toBeGreaterThanOrEqual(-1)
+			expect(v).toBeLessThanOrEqual(1)
+		}
 	})
 })
