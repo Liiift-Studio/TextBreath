@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
 import "./globals.css"
-import { Inter } from "next/font/google"
+import localFont from "next/font/local"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
+const inter = localFont({ src: "../../public/fonts/inter-300.woff", variable: "--font-sans", weight: "300" })
 
 export const metadata: Metadata = {
 	title: "Text Breath — Per-line letter-spacing and axis wave animation",

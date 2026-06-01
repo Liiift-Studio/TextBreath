@@ -11,7 +11,7 @@ export default async function Image() {
 	return new ImageResponse(
 		(
 			<div style={{ background: '#0c0c0c', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '72px 80px', fontFamily: 'Inter, sans-serif' }}>
-				<span style={{ fontSize: 13, letterSpacing: '0.18em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>breathe</span>
+				<span style={{ fontSize: 13, letterSpacing: '0.18em', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>textbreath</span>
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
 					<div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 48 }}>
 						{[1.0, 0.97, 0.92, 0.96, 1.0].map((scale, i) => (
