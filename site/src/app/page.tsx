@@ -14,27 +14,27 @@ export default function Home() {
 			{/* Hero */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
 				<div className="flex flex-col gap-2">
-					<h2 className="text-xs uppercase tracking-widest opacity-50">textbreath</h2>
+					<p className="text-xs uppercase tracking-[0.18em] font-medium text-muted">textbreath</p>
 					<h1 className="text-4xl lg:text-8xl xl:text-9xl" style={{ fontFamily: "var(--font-merriweather), serif", fontVariationSettings: '"wght" 300, "opsz" 144', lineHeight: "1.05em" }}>
 						<MagnetChar as="span" minWeight={300} maxWeight={800} spreadRadius={220} fixedAxes={{ opsz: 144 }}>The paragraph</MagnetChar><br />
-						<MagnetChar as="span" minWeight={300} maxWeight={800} spreadRadius={220} fixedAxes={{ opsz: 144 }} style={{ opacity: 0.5, fontStyle: "italic" }}>breathes.</MagnetChar>
+						<MagnetChar as="span" minWeight={300} maxWeight={800} spreadRadius={220} fixedAxes={{ opsz: 144 }} style={{ color: "var(--foreground-subtle)", fontStyle: "italic" }}>breathes.</MagnetChar>
 					</h1>
 				</div>
 				<div className="flex items-center gap-4">
 					<CopyInstall />
-					<a href="https://github.com/Liiift-Studio/TextBreath" className="text-sm opacity-50 hover:opacity-100 transition-opacity">GitHub</a>
+					<a href="https://github.com/Liiift-Studio/TextBreath" target="_blank" rel="noopener noreferrer" aria-label="textBreath on GitHub (opens in new tab)" className="text-sm text-muted hover:text-foreground transition-colors">GitHub ↗</a>
 				</div>
-				<div className="flex flex-wrap gap-x-4 gap-y-1 text-xs opacity-50 tracking-wide">
-					<span>TypeScript</span><span>·</span><span>Zero dependencies</span><span>·</span><span>React + Vanilla JS</span>
+				<div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted tracking-wide">
+					<span>TypeScript</span><span aria-hidden="true">·</span><span>Zero dependencies</span><span aria-hidden="true">·</span><span>React + Vanilla JS</span>
 				</div>
-				<p className="text-base opacity-60 leading-relaxed max-w-lg">
+				<p className="text-base leading-relaxed max-w-lg">
 					Each line of a paragraph oscillates its letter-spacing — or variable font axis — at a phase offset from its neighbours. Two modes: <em>phase</em> gives each line a fixed ripple; <em>tide</em> sends a traveling wave through the paragraph. At low amplitudes it reads as living rather than animated.
 				</p>
 			</section>
 
 			{/* Demo */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-4">
-				<h2 className="text-xs uppercase tracking-widest opacity-50">Live demo — watch the paragraph</h2>
+				<h2 className="text-xs uppercase tracking-[0.18em] font-medium text-muted">Live demo — watch the paragraph</h2>
 				<div className="rounded-xl -mx-8 px-8 py-8" style={{ background: "rgba(0,0,0,0.25)", overflow: 'hidden' }}>
 					<Demo />
 				</div>
@@ -42,14 +42,14 @@ export default function Home() {
 
 			{/* Explanation */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
-				<h2 className="text-xs uppercase tracking-widest opacity-50">How it works</h2>
-				<div className="prose-grid grid grid-cols-1 sm:grid-cols-2 gap-12 text-sm leading-relaxed opacity-70">
+				<h2 className="text-xs uppercase tracking-[0.18em] font-medium text-muted">How it works</h2>
+				<div className="prose-grid grid grid-cols-1 sm:grid-cols-2 gap-12 text-sm leading-relaxed">
 					<div className="flex flex-col gap-3">
-						<p className="font-semibold opacity-100 text-base">Phase mode</p>
+						<p className="font-semibold text-base">Phase mode</p>
 						<p>Each visual line is assigned a fixed phase offset. The wave function is evaluated at each line&rsquo;s phase every frame. Lines oscillate in place at staggered positions in the cycle — a standing ripple rather than a wave that moves.</p>
 					</div>
 					<div className="flex flex-col gap-3">
-						<p className="font-semibold opacity-100 text-base">Tide mode</p>
+						<p className="font-semibold text-base">Tide mode</p>
 						<p>A wave travels through the paragraph from top to bottom (or bottom to top). Each line&rsquo;s phase advances with time and its position in the paragraph — the same wave that passes through floodText, but applied to letter-spacing or a variable font axis.</p>
 					</div>
 				</div>
@@ -58,11 +58,11 @@ export default function Home() {
 			{/* Usage */}
 			<section className="w-full max-w-2xl lg:max-w-5xl flex flex-col gap-6">
 				<div className="flex items-baseline gap-4">
-					<h2 className="text-xs uppercase tracking-widest opacity-50">Usage</h2>
+					<h2 className="text-xs uppercase tracking-[0.18em] font-medium text-muted">Usage</h2>
 				</div>
 				<div className="flex flex-col gap-8 text-sm">
 					<div className="flex flex-col gap-3">
-						<p className="opacity-50">Drop-in component</p>
+						<p className="text-muted">Drop-in component</p>
 						<CodeBlock code={`import { BreatheText } from '@liiift-studio/textbreath'
 
 <BreatheText amplitude={0.012} period={3.5} phaseOffset={0.785}>
@@ -70,14 +70,14 @@ export default function Home() {
 </BreatheText>`} />
 					</div>
 					<div className="flex flex-col gap-3">
-						<p className="opacity-50">Hook</p>
+						<p className="text-muted">Hook</p>
 						<CodeBlock code={`import { useBreathe } from '@liiift-studio/textbreath'
 
 const ref = useBreathe({ amplitude: 0.012, period: 3.5, phaseOffset: 0.785 })
 <p ref={ref}>{children}</p>`} />
 					</div>
 					<div className="flex flex-col gap-3">
-						<p className="opacity-50">Vanilla JS</p>
+						<p className="text-muted">Vanilla JS</p>
 						<CodeBlock code={`import { applyBreathe, startBreathe, removeBreathe, getCleanHTML, BREATHE_CLASSES, sawtoothWave, triangleWave } from '@liiift-studio/textbreath'
 
 const el = document.querySelector('p')
@@ -94,10 +94,10 @@ removeBreathe(el, original)
 // sawtoothWave / triangleWave are exported for building custom animations`} />
 					</div>
 					<div className="flex flex-col gap-3">
-						<p className="opacity-50">Options</p>
+						<p className="text-muted">Options</p>
 						<table className="w-full text-xs" aria-label="API options">
-							<thead><tr className="opacity-50 text-left"><th className="pb-2 pr-6 font-normal">Option</th><th className="pb-2 pr-6 font-normal">Default</th><th className="pb-2 font-normal">Description</th></tr></thead>
-							<tbody className="opacity-70">
+							<thead><tr className="text-subtle text-left"><th className="pb-2 pr-6 font-normal">Option</th><th className="pb-2 pr-6 font-normal">Default</th><th className="pb-2 font-normal">Description</th></tr></thead>
+							<tbody className="text-muted">
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">amplitude</td><td className="py-2 pr-6">0.012</td><td className="py-2">Peak change per cycle. Em for letter-spacing; multiplied by 100 for wdth (amplitude=1 → ±100 wdth units), multiplied by 400 for wght (amplitude=1 → ±400 wght units).</td></tr>
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">period</td><td className="py-2 pr-6">3.5</td><td className="py-2">Seconds per full oscillation cycle.</td></tr>
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">phaseOffset</td><td className="py-2 pr-6">π/4</td><td className="py-2">Phase shift between adjacent lines in radians. Used in phase mode only.</td></tr>
@@ -105,7 +105,7 @@ removeBreathe(el, original)
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">axis</td><td className="py-2 pr-6">&apos;letter-spacing&apos;</td><td className="py-2">&apos;letter-spacing&apos; | &apos;wdth&apos; | &apos;wght&apos;</td></tr>
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">mode</td><td className="py-2 pr-6">&apos;phase&apos;</td><td className="py-2">&apos;phase&apos; = standing ripple per line, &apos;tide&apos; = wave travels through paragraph.</td></tr>
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">direction</td><td className="py-2 pr-6">&apos;down&apos;</td><td className="py-2">Tide travel direction. &apos;down&apos; | &apos;up&apos;. Used in tide mode only.</td></tr>
-								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">lineDetection</td><td className="py-2 pr-6">&apos;bcr&apos;</td><td className="py-2">&apos;bcr&apos; reads actual browser layout — ground truth, works with any font and inline HTML. &apos;canvas&apos; uses <a href="https://github.com/chenglou/pretext" className="underline opacity-70">@chenglou/pretext</a> for arithmetic line breaking with no forced reflow on resize. Install pretext separately.</td></tr>
+								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">lineDetection</td><td className="py-2 pr-6">&apos;bcr&apos;</td><td className="py-2">&apos;bcr&apos; reads actual browser layout — ground truth, works with any font and inline HTML. &apos;canvas&apos; uses <a href="https://github.com/chenglou/pretext" className="underline text-muted">@chenglou/pretext</a> for arithmetic line breaking with no forced reflow on resize. Install pretext separately.</td></tr>
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">pauseOffscreen</td><td className="py-2 pr-6">true</td><td className="py-2">Skip animation work when the element is not in the viewport. Uses IntersectionObserver. The rAF loop keeps running — the tick simply does nothing while offscreen. Resume is instant with no frame delay.</td></tr>
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">cancelOffscreen</td><td className="py-2 pr-6">false</td><td className="py-2">Cancel the rAF loop entirely when the element leaves the viewport and restart it on re-entry. Saves more CPU and battery than the default flag-based pause — useful for pages with many textBreath instances or long animations running offscreen. Adds one frame (~16 ms) of delay on resume. Requires pauseOffscreen to be true.</td></tr>
 								<tr className="border-t border-white/10 hover:bg-white/5 transition-colors"><td className="py-2 pr-6 font-mono">linePreservation</td><td className="py-2 pr-6">&apos;none&apos;</td><td className="py-2">Line width strategy during animation. &apos;none&apos; — lines expand and contract freely. &apos;clamp&apos; — each line is constrained to its natural width via max-width and overflow: hidden, preventing container overflow at high amplitudes.</td></tr>
@@ -114,10 +114,10 @@ removeBreathe(el, original)
 						</table>
 					</div>
 					<div className="flex flex-col gap-3">
-						<p className="opacity-50">Accessibility &amp; compatibility</p>
-						<div className="text-xs opacity-70 flex flex-col gap-2">
-							<p><strong className="opacity-100">prefers-reduced-motion</strong> — <code>startBreathe</code> skips the animation loop when the user has requested reduced motion. The DOM structure is still built but no values are applied.</p>
-							<p><strong className="opacity-100">(update: slow)</strong> — On e-ink and slow-refresh displays (Kindle, reMarkable, etc.) both <code>applyBreathe</code> and <code>startBreathe</code> return immediately without restructuring the DOM or starting the rAF loop. The element is restored to its original HTML. Detection uses <code>matchMedia(&apos;(update: slow)&apos;)</code>.</p>
+						<p className="text-muted">Accessibility &amp; compatibility</p>
+						<div className="text-xs text-muted flex flex-col gap-2">
+							<p><strong>prefers-reduced-motion</strong> — <code>startBreathe</code> skips the animation loop when the user has requested reduced motion. The DOM structure is still built but no values are applied.</p>
+							<p><strong>(update: slow)</strong> — On e-ink and slow-refresh displays (Kindle, reMarkable, etc.) both <code>applyBreathe</code> and <code>startBreathe</code> return immediately without restructuring the DOM or starting the rAF loop. The element is restored to its original HTML. Detection uses <code>matchMedia(&apos;(update: slow)&apos;)</code>.</p>
 						</div>
 					</div>
 				</div>

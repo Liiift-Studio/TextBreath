@@ -27,9 +27,9 @@ function Slider({ label, value, min, max, step, fmt, title, onChange }: { label:
 	const valueId = `${inputId}-value`
 	return (
 		<div className="flex flex-col gap-1">
-			<label htmlFor={inputId} className="text-xs uppercase tracking-widest opacity-50">{label}</label>
+			<label htmlFor={inputId} className="text-xs uppercase tracking-[0.18em] font-medium text-muted">{label}</label>
 			<input id={inputId} type="range" min={min} max={max} step={step} value={value} aria-label={label} aria-describedby={valueId} title={title} onChange={e => onChange(Number(e.target.value))} onTouchStart={e => e.stopPropagation()} style={{ touchAction: 'pan-y' }} />
-			<span id={valueId} className="tabular-nums text-xs opacity-50 text-right">{fmt ? fmt(value) : value}</span>
+			<span id={valueId} className="tabular-nums text-xs text-muted text-right">{fmt ? fmt(value) : value}</span>
 		</div>
 	)
 }
@@ -406,25 +406,25 @@ export default function Demo() {
 				)}
 			</div>
 			<div className="flex flex-wrap items-center gap-3 mb-8">
-				<span className="text-xs uppercase tracking-widest opacity-50">Axis</span>
+				<span className="text-xs uppercase tracking-[0.18em] font-medium text-muted">Axis</span>
 				{(['letter-spacing', 'wdth', 'wght'] as const).map(v => (
 					<button key={v} onClick={() => handleAxisChange(v)} aria-pressed={axis === v} title={v === 'letter-spacing' ? 'Oscillate letter-spacing — changes text density; works with any font' : v === 'wdth' ? 'Oscillate the wdth variable font axis — changes character width; requires a variable font with a wdth axis' : 'Oscillate the wght variable font axis — changes stroke weight; requires a variable font with a wght axis'} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: axis === v ? 1 : 0.5, background: axis === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
 				))}
-				<span className="text-xs uppercase tracking-widest opacity-50 ml-4">Wave</span>
+				<span className="text-xs uppercase tracking-[0.18em] font-medium text-muted ml-4">Wave</span>
 				{(['sine', 'triangle', 'sawtooth'] as const).map(v => (
 					<button key={v} onClick={() => setWaveShape(v)} aria-pressed={waveShape === v} title={v === 'sine' ? 'Sine wave — smooth, organic, continuous motion that eases in and out at the extremes; the most natural-feeling breath' : v === 'triangle' ? 'Triangle wave — linear ramps with sharp reversals; more mechanical and rhythmic than sine' : 'Sawtooth wave — instant reset followed by a slow ramp; creates an asymmetric, tidal surge quality'} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: waveShape === v ? 1 : 0.5, background: waveShape === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
 				))}
-				<span className="text-xs uppercase tracking-widest opacity-50 ml-4">Mode</span>
+				<span className="text-xs uppercase tracking-[0.18em] font-medium text-muted ml-4">Mode</span>
 				{(['phase', 'tide'] as const).map(v => (
 					<button key={v} onClick={() => setMode(v)} aria-pressed={mode === v} title={v === 'phase' ? 'Phase mode — each line has a fixed offset in the oscillation cycle, determined by the Phase offset slider; lines never synchronise' : 'Tide mode — the oscillation peak travels through the paragraph from top to bottom (or bottom to top), like a wave passing through the text'} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: mode === v ? 1 : 0.5, background: mode === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
 				))}
 				{mode === 'phase' && (
-					<span className="text-xs opacity-40 italic ml-2">— each line oscillates independently</span>
+					<span className="text-xs text-subtle italic ml-2">— each line oscillates independently</span>
 				)}
 				{mode === 'tide' && (
 					<>
-						<span className="text-xs opacity-40 italic ml-2">— wave travels through paragraph</span>
-						<span className="text-xs uppercase tracking-widest opacity-50 ml-4">Dir</span>
+						<span className="text-xs text-subtle italic ml-2">— wave travels through paragraph</span>
+						<span className="text-xs uppercase tracking-[0.18em] font-medium text-muted ml-4">Dir</span>
 						{(['down', 'up'] as const).map(v => (
 							<button key={v} onClick={() => setDirection(v)} aria-pressed={direction === v} title={v === 'down' ? 'Wave travels from the first line to the last — the breath descends through the paragraph' : 'Wave travels from the last line to the first — the breath ascends through the paragraph'} className="text-xs px-3 py-1 rounded-full border transition-opacity" style={{ borderColor: 'currentColor', opacity: direction === v ? 1 : 0.5, background: direction === v ? 'var(--btn-bg)' : 'transparent' }}>{v}</button>
 						))}
@@ -443,7 +443,7 @@ export default function Demo() {
 				)}
 				<BeforeAfterToggle active={beforeAfter} onClick={() => setComparing(v => !v)} />
 			</div>
-			<p aria-live="polite" aria-atomic="true" className="text-xs opacity-50 italic mt-8" style={{ lineHeight: "1.8" }}>
+			<p aria-live="polite" aria-atomic="true" className="text-xs text-muted italic mt-8" style={{ lineHeight: "1.8" }}>
 				{activeMode
 					? cursorMode
 						? 'Move cursor to adjust period and amplitude. Press Esc to exit.'
